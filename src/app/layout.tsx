@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Roboto_Condensed } from "next/font/google";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import { Header } from "@/components/layout/header";
+import { Sidebar } from "@/components/layout/sidebar";
+import { ContentProvider } from "@/components/provider/content-provider";
+import { ToggleProvider } from "@/components/provider/toggle-provider";
+import { Chatbot } from "@/components/ui/chatbot";
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const font = Roboto_Condensed({
+  variable: "--font-custom",
   subsets: ["latin"],
 });
 
@@ -23,11 +24,21 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en">
+      <body
+        className={`${font.variable} flex flex-col items-center antialiased`}
+      >
+        <ContentProvider>
+          <ToggleProvider>
+            <Header />
+            <Sidebar />
+
+            {children}
+
+            <Chatbot />
+          </ToggleProvider>
+        </ContentProvider>
+      </body>
     </html>
   );
 }
