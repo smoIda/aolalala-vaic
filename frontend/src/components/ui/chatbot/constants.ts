@@ -40,6 +40,19 @@ export function ChatAction(
     case "CREATE_CHAT":
       return { ...base, chats: [...base.chats, action.payload] };
 
+    case "UPDATE_CHAT":
+      return {
+        ...base,
+        chats: base.chats.map((chat) =>
+          chat.id === action.payload.id
+            ? {
+                ...chat,
+                ...action.payload,
+              }
+            : chat,
+        ),
+      };
+
     case "DELETE_CHAT":
       return {
         ...base,

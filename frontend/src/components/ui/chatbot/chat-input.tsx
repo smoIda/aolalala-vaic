@@ -2,12 +2,32 @@ import { nanoid } from "nanoid";
 
 import { InputProps } from "@/components/ui/chatbot/types";
 import { useEffect, useRef } from "react";
+import { sendChat } from "@/lib/api/sendChat";
 
-export function ChatInput({ input, setInput, dispatch }: InputProps) {
-  const handleSend = () => {
+const fixedPrompts = [
+  "Schedule an appointment",
+  "Lower blood pressure naturally",
+  "Explain my cholesterol report",
+  "Clinics near my location",
+];
+
+export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
+  const generateTitle = (content: string) => {
+    return content.length > 40 ? content.slice(0, 40) + "..." : content;
+  };
+
+  const handleSend = async () => {
     const content = input.trim();
 
     if (!content) return;
+
+    const currentChat = state.chats.find(
+      (chat) => chat.id === state.activeChatId,
+    );
+
+    if (!currentChat) return;
+
+    const isFirstPrompt = currentChat?.messages.length === 0;
 
     dispatch({
       type: "SEND_MESSAGE",
@@ -19,19 +39,39 @@ export function ChatInput({ input, setInput, dispatch }: InputProps) {
       },
     });
 
+    if (isFirstPrompt)
+      dispatch({
+        type: "UPDATE_CHAT",
+        payload: { id: currentChat.id, title: generateTitle(content) },
+      });
+
     setInput("");
 
-    setTimeout(() => {
+    try {
+      const data = await sendChat(content, currentChat.sessionId);
+
+      if (!currentChat.sessionId) {
+        dispatch({
+          type: "UPDATE_CHAT",
+          payload: {
+            id: currentChat.id,
+            sessionId: data.session.id,
+          },
+        });
+      }
+
       dispatch({
         type: "SEND_MESSAGE",
         payload: {
           id: nanoid(),
           role: "bot",
-          content: "cmmmmmm",
+          content: data.response,
           createdAt: new Date().toISOString(),
         },
       });
-    }, 2500);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
@@ -46,11 +86,35 @@ export function ChatInput({ input, setInput, dispatch }: InputProps) {
   }, [input]);
 
   return (
-    <div className="mt-auto flex w-full shrink-0 flex-col items-center gap-2 px-4 py-2">
-      <div className="bg-grey-ink/10 flex w-full flex-col items-start gap-y-1 pb-2 rounded-2xl px-4">
+    <div className="mt-auto flex w-full shrink-0 flex-col items-center gap-y-2 px-4 py-2">
+      <div className="no-scroll flex w-full items-start gap-x-2 overflow-x-auto">
+        {fixedPrompts.map((prompt, index) => {
+          return (
+            <button
+              key={index}
+              onClick={() =>
+                dispatch({
+                  type: "SEND_MESSAGE",
+                  payload: {
+                    id: nanoid(),
+                    role: "user",
+                    content: prompt,
+                    createdAt: new Date().toISOString(),
+                  },
+                })
+              }
+              className="border-grey-ink/40 text-grey-ink/80 hover:text-accent-ink hover:border-accent-ink cursor-pointer rounded-full border px-2 py-1 text-sm text-nowrap"
+            >
+              {prompt}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="bg-grey-ink/10 flex w-full items-center justify-between rounded-2xl px-4">
         <textarea
           ref={textareaRef}
-          placeholder="Ask about symptoms, medications, appointments,..."
+          placeholder="Ask about symptoms,..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -63,10 +127,10 @@ export function ChatInput({ input, setInput, dispatch }: InputProps) {
           className="placeholder:text-grey-ink h-auto max-h-40 w-full resize-none overflow-y-auto rounded-lg py-4 outline-none"
         />
 
-        <div className="flex justify-between items-center w-full">
+        <div className="flex items-center justify-center gap-x-2">
           <svg
             viewBox="-5 0 32 32"
-            className="group size-6 cursor-pointer fill-none"
+            className="group size-5 cursor-pointer fill-none"
           >
             <path
               transform="translate(-105.000000, -307.000000)"
@@ -78,16 +142,14 @@ export function ChatInput({ input, setInput, dispatch }: InputProps) {
           <button
             aria-label="send"
             onClick={handleSend}
-            className={`${input.trim() ? "opacity-100" : "opacity-50"} bg-accent-ink flex shrink-0 transform-[scale] cursor-pointer items-center justify-center gap-x-2 rounded-full px-4 py-1.25 duration-200 hover:scale-110 active:scale-90`}
+            className={`${input.trim() ? "opacity-100" : "opacity-50"} bg-accent-ink flex size-8 shrink-0 transform-[scale] cursor-pointer items-center justify-center gap-x-2 rounded-full duration-200 hover:scale-110 active:scale-90`}
           >
-            <svg viewBox="0 0 24 24" className="size-4 fill-none">
+            <svg viewBox="0 0 24 24" className="size-5 fill-none">
               <path
                 d="M20.33 3.66996C20.1408 3.48213 19.9035 3.35008 19.6442 3.28833C19.3849 3.22659 19.1135 3.23753 18.86 3.31996L4.23 8.19996C3.95867 8.28593 3.71891 8.45039 3.54099 8.67255C3.36307 8.89471 3.25498 9.16462 3.23037 9.44818C3.20576 9.73174 3.26573 10.0162 3.40271 10.2657C3.5397 10.5152 3.74754 10.7185 4 10.85L10.07 13.85L13.07 19.94C13.1906 20.1783 13.3751 20.3785 13.6029 20.518C13.8307 20.6575 14.0929 20.7309 14.36 20.73H14.46C14.7461 20.7089 15.0192 20.6023 15.2439 20.4239C15.4686 20.2456 15.6345 20.0038 15.72 19.73L20.67 5.13996C20.7584 4.88789 20.7734 4.6159 20.7132 4.35565C20.653 4.09541 20.5201 3.85762 20.33 3.66996ZM4.85 9.57996L17.62 5.31996L10.53 12.41L4.85 9.57996ZM14.43 19.15L11.59 13.47L18.68 6.37996L14.43 19.15Z"
                 className="fill-white-ink"
               />
             </svg>
-
-            <span className="text-white-ink font-bold">Send</span>
           </button>
         </div>
       </div>

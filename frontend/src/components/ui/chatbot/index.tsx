@@ -10,8 +10,7 @@ import { ChatMaximized } from "./chat-maximized";
 import { Chatbox } from "./chat-box";
 
 export function Chatbot() {
-  const { isChatbotOpen, setIsChatbotOpen, isDarkTheme, setIsDarkTheme } =
-    useToggle();
+  const { isChatbotOpen, setIsChatbotOpen, setIsDarkTheme } = useToggle();
   const [input, setInput] = useState("");
   const [state, dispatch] = useReducer(ChatAction, BaseChat);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -61,10 +60,9 @@ export function Chatbot() {
                 </div>
 
                 <div>
-                  <h2 className="text-white-ink font-medium">CardioAI</h2>
+                  <h2 className="text-white-ink font-medium">HeartCare</h2>
                   <p className="text-white-ink/70 xs:flex hidden items-center justify-center gap-x-2 text-sm">
-                    <span className="size-1.5 rounded-full bg-green-400" />
-                    Bệnh viện Tim Hà Nội
+                    HeartCare Hospital
                   </p>
                 </div>
               </div>
@@ -140,7 +138,12 @@ export function Chatbot() {
 
             <Chatbox {...state} />
 
-            <ChatInput input={input} setInput={setInput} dispatch={dispatch} />
+            <ChatInput
+              input={input}
+              setInput={setInput}
+              dispatch={dispatch}
+              state={state}
+            />
           </div>
 
           <button

@@ -7,6 +7,6 @@ export function Sidebar() {
 
   if (isSidebarOpen)
     return (
-      <aside className="bg-accent-ink fixed left-0 z-60 h-full w-80">yo</aside>
+      <aside className="bg-accent-ink fixed left-0 z-60 h-screen w-80">yo</aside>
     );
 }

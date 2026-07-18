@@ -16,7 +16,7 @@ export function Chatbox(state: BaseChatProps) {
           >
             {message.role === "user" ? (
               <div className="flex size-8 items-center justify-center rounded-full bg-pink-800">
-                <span className="text-white-ink font-bold">JD</span>
+                <span className="text-white font-bold">JD</span>
               </div>
             ) : (
               <div className="bg-accent-ink flex size-8 items-center justify-center rounded-full">

@@ -7,6 +7,7 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { ContentProvider } from "@/components/provider/content-provider";
 import { ToggleProvider } from "@/components/provider/toggle-provider";
 import { Chatbot } from "@/components/ui/chatbot";
+import { QueryProvider } from "@/components/provider/tanstack-provider";
 
 const font = Roboto_Condensed({
   variable: "--font-custom",
@@ -28,16 +29,18 @@ export default function RootLayout({
       <body
         className={`${font.variable} flex flex-col items-center antialiased`}
       >
-        <ToggleProvider>
-          <ContentProvider>
-            <Header />
-            <Sidebar />
+        <QueryProvider>
+          <ToggleProvider>
+            <ContentProvider>
+              <Header />
+              <Sidebar />
 
-            {children}
+              {children}
 
-            <Chatbot />
-          </ContentProvider>
-        </ToggleProvider>
+              <Chatbot />
+            </ContentProvider>
+          </ToggleProvider>
+        </QueryProvider>
       </body>
     </html>
   );

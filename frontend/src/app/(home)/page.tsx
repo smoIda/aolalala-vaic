@@ -112,7 +112,7 @@ const backgroundColors = [
 export default function Home() {
   return (
     <section>
-      <div className="absolute bottom-5 left-1/2 flex -translate-x-1/2 justify-center">
+      <div className="absolute w-11/12 max-w-6xl bottom-5 left-1/2 -translate-x-1/2 grid lg:grid-cols-4 xs:grid-cols-2 grid-cols-1 justify-center">
         {links.map((link, i) => {
           return (
             <a

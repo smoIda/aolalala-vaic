@@ -2,6 +2,7 @@ export type InputProps = {
   input: string;
   setInput: React.Dispatch<React.SetStateAction<string>>;
   dispatch: React.Dispatch<ChatActionProps>;
+  state: BaseChatProps;
 };
 
 export type ChatMaximizedProps = InputProps & {
@@ -22,6 +23,7 @@ export type ChatProps = {
   id: string;
   title: string;
   isStreaming?: boolean;
+  sessionId?: string;
   messages: MessageProps[];
 };
 
@@ -36,5 +38,11 @@ export type ChatActionProps =
       payload: MessageProps;
     }
   | { type: "CREATE_CHAT"; payload: ChatProps }
+  | {
+      type: "UPDATE_CHAT";
+      payload: {
+        id: string;
+      } & Partial<Pick<ChatProps, "title" | "sessionId" | "isStreaming">>;
+    }
   | { type: "DELETE_CHAT"; payload: string }
   | { type: "SELECT_CHAT"; payload: string };
