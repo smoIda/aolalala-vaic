@@ -33,6 +33,7 @@ export type BaseChatProps = {
 };
 
 export type ChatActionProps =
+  | { type: "LOAD_CHAT"; payload: ChatProps[] }
   | {
       type: "SEND_MESSAGE";
       payload: MessageProps;

@@ -1,24 +1,7 @@
 import { BaseChatProps, ChatActionProps } from "@/components/ui/chatbot/types";
 
 export const BaseChat: BaseChatProps = {
-  chats: [
-    {
-      id: "1",
-      title: "New conversation",
-
-      isStreaming: false,
-
-      messages: [
-        {
-          id: "1",
-          role: "bot",
-          content:
-            "Xin chào, tôi là trợ lý ảo tại Bệnh viện Tim Hà Nội, tôi có thể giúp gì cho bạn?",
-          createdAt: new Date().toISOString(),
-        },
-      ],
-    },
-  ],
+  chats: [],
   activeChatId: "1",
 };
 
@@ -27,6 +10,9 @@ export function ChatAction(
   action: ChatActionProps,
 ): BaseChatProps {
   switch (action.type) {
+    case "LOAD_CHAT":
+      return { ...base, chats: action.payload };
+
     case "SEND_MESSAGE":
       return {
         ...base,

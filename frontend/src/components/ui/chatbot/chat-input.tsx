@@ -10,7 +10,11 @@ const fixedPrompts = [
   "Lower blood pressure naturally",
   "Explain my cholesterol report",
   "Clinics near my location",
-  ""
+  "What are the signs of a heart attack?",
+  "My heart rate feels too fast",
+  "Can I exercise with high blood pressure?",
+  "Healthy diet for heart disease",
+  "What does my ECG result mean?",
 ];
 
 export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
@@ -89,6 +93,16 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
       });
     } catch (err) {
       console.error(err);
+
+      dispatch({
+        type: "SEND_MESSAGE",
+        payload: {
+          id: nanoid(),
+          role: "bot",
+          content: "I couldn't process your request right now.",
+          createdAt: new Date().toISOString(),
+        },
+      });
     } finally {
       dispatch({
         type: "SET_STREAMING",
@@ -185,15 +199,12 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
 
   return (
     <div className="mt-auto flex w-full shrink-0 flex-col items-center gap-y-2 px-4 py-2">
-      <div className="no-scroll flex w-full items-start gap-x-2 overflow-x-auto">
+      <div className="flex w-full scrollbar-none items-start gap-x-2 overflow-x-auto">
         {fixedPrompts.map((prompt, index) => {
           return (
             <button
               key={index}
-              onClick={() => {
-                input = prompt;
-                handleSend();
-              }}
+              onClick={() => handleSend(prompt)}
               className="border-grey-ink/40 text-grey-ink/80 hover:text-accent-ink hover:border-accent-ink cursor-pointer rounded-full border px-2 py-1 text-sm text-nowrap"
             >
               {prompt}
