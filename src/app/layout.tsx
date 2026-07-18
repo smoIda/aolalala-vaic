@@ -28,16 +28,16 @@ export default function RootLayout({
       <body
         className={`${font.variable} flex flex-col items-center antialiased`}
       >
-        <ContentProvider>
-          <ToggleProvider>
+        <ToggleProvider>
+          <ContentProvider>
             <Header />
             <Sidebar />
 
             {children}
 
             <Chatbot />
-          </ToggleProvider>
-        </ContentProvider>
+          </ContentProvider>
+        </ToggleProvider>
       </body>
     </html>
   );

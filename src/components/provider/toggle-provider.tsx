@@ -7,6 +7,8 @@ export type ToggleContextProps = {
   setIsSidebarOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isChatbotOpen: boolean;
   setIsChatbotOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  isDarkTheme: boolean;
+  setIsDarkTheme: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const ToggleContext = createContext<ToggleContextProps | undefined>(
@@ -16,6 +18,7 @@ export const ToggleContext = createContext<ToggleContextProps | undefined>(
 export function ToggleProvider({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const [isDarkTheme, setIsDarkTheme] = useState(false);
 
   const values = useMemo(
     () => ({
@@ -23,8 +26,10 @@ export function ToggleProvider({ children }: { children: React.ReactNode }) {
       setIsSidebarOpen,
       isChatbotOpen,
       setIsChatbotOpen,
+      isDarkTheme,
+      setIsDarkTheme,
     }),
-    [isSidebarOpen, isChatbotOpen],
+    [isSidebarOpen, isChatbotOpen, isDarkTheme],
   );
 
   return (

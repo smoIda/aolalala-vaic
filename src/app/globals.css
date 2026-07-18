@@ -5,10 +5,24 @@
 
   --color-ink: #000;
   --color-white-ink: #fff;
+  --color-grey-ink: #86898f;
+
+  --color-accent-ink: #3d6889;
+  --color-accent-ink-soft: #4d7c9f;
+
+  --color-link-ink: #297c29;
+  --color-link-ink-hover: #6ad289;
+
+  --color-alert-ink: #fb2c36;
+}
+
+.dark {
+  --color-ink: #fff;
+  --color-white-ink: #000;
   --color-grey-ink: #9ba3b0;
 
-  --color-accent-ink: #1976d2;
-  --color-accent-ink-soft: #468fd9;
+  --color-accent-ink: #3d6889;
+  --color-accent-ink-soft: #4d7c9f;
 
   --color-link-ink: #297c29;
   --color-link-ink-hover: #6ad289;
