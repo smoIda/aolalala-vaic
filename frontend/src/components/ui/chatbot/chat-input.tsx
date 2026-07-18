@@ -6,15 +6,14 @@ import { sendChat } from "@/lib/api/sendChat";
 import { transcribeVoice } from "@/lib/api/sendVoice";
 
 const fixedPrompts = [
-  "Schedule an appointment",
-  "Lower blood pressure naturally",
-  "Explain my cholesterol report",
-  "Clinics near my location",
-  "What are the signs of a heart attack?",
-  "My heart rate feels too fast",
-  "Can I exercise with high blood pressure?",
-  "Healthy diet for heart disease",
-  "What does my ECG result mean?",
+  "Đặt lịch khám",
+  "Giảm huyết áp một cách tự nhiên",
+  "Giải thích kết quả xét nghiệm cholesterol của tôi",
+  "Các phòng khám gần vị trí của tôi",
+  "Dấu hiệu của cơn đau tim là gì?",
+  "Nhịp tim của tôi có vẻ quá nhanh",
+  "Tôi có thể tập thể dục khi bị cao huyết áp không?",
+  "Chế độ ăn tốt cho người mắc bệnh tim",
 ];
 
 export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
@@ -27,9 +26,28 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
   );
 
   const handleSend = async (message?: string) => {
-    const chat = state.chats.find((chat) => chat.id === state.activeChatId);
+    let chat = state.chats.find((chat) => chat.id === state.activeChatId);
 
-    if (!chat) return;
+    if (!chat) {
+      const newId = nanoid();
+
+      chat = {
+        id: newId,
+        title: "New chat",
+        messages: [],
+      };
+
+      dispatch({
+        type: "CREATE_CHAT",
+        payload: chat,
+      });
+
+      dispatch({
+        type: "SELECT_CHAT",
+        payload: newId,
+      });
+    }
+
     if (chat.isStreaming) return;
 
     const content = (message ?? input).trim();
@@ -57,7 +75,7 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
       },
     });
 
-    if (isFirstPrompt) {
+    if (isFirstPrompt)
       dispatch({
         type: "UPDATE_CHAT",
         payload: {
@@ -65,7 +83,6 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
           title: generateTitle(content),
         },
       });
-    }
 
     setInput("");
 
@@ -99,7 +116,7 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
         payload: {
           id: nanoid(),
           role: "bot",
-          content: "I couldn't process your request right now.",
+          content: "Có lỗi xảy ra, vui lòng thử lại.",
           createdAt: new Date().toISOString(),
         },
       });
@@ -165,7 +182,9 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
         try {
           const { transcript } = await transcribeVoice(audioBlob);
           if (transcript) {
-            setInput((prev) => (prev.trim() ? `${prev.trim()} ${transcript}` : transcript));
+            setInput((prev) =>
+              prev.trim() ? `${prev.trim()} ${transcript}` : transcript,
+            );
           }
         } catch (err) {
           console.error(err);
@@ -180,7 +199,9 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
       setIsRecording(true);
     } catch (err) {
       console.error(err);
-      alert("Không thể truy cập microphone. Vui lòng cấp quyền micro cho trình duyệt.");
+      alert(
+        "Không thể truy cập microphone. Vui lòng cấp quyền micro cho trình duyệt.",
+      );
     }
   };
 
@@ -216,7 +237,7 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
       <div className="bg-grey-ink/10 flex w-full items-center justify-between rounded-2xl px-4">
         <textarea
           ref={textareaRef}
-          placeholder="Ask about symptoms,..."
+          placeholder="Tình trạng sức khoẻ hiện tại của bạn..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {

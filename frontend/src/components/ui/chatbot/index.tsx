@@ -49,6 +49,13 @@ const init = () => {
 
     const chats = JSON.parse(saved);
 
+    if (!Array.isArray(chats) || chats.length === 0) {
+      return {
+        chats: [DEFAULT_CHAT],
+        activeChatId: DEFAULT_CHAT.id,
+      };
+    }
+
     return {
       chats,
       activeChatId: chats[0]?.id ?? DEFAULT_CHAT.id,
@@ -116,7 +123,7 @@ export function Chatbot() {
                 <div>
                   <h2 className="text-white-ink font-medium">HeartCare</h2>
                   <p className="text-white-ink/70 xs:flex hidden items-center justify-center gap-x-2 text-sm">
-                    HeartCare Hospital
+                    Care Assistant
                   </p>
                 </div>
               </div>
@@ -202,7 +209,7 @@ export function Chatbot() {
 
           <button
             onClick={() => setIsChatbotOpen(!isChatbotOpen)}
-            className="from-accent-ink to-accent-ink/40 fixed right-8 bottom-8 flex size-15 cursor-pointer items-center justify-center rounded-full bg-linear-to-br shadow-[-5px_10px_30px_-5px_rgba(37,99,235)] transition-[scale] active:scale-90"
+            className="from-accent-ink to-accent-ink/40 fixed right-8 bottom-8 flex size-15 cursor-pointer items-center justify-center rounded-full bg-linear-to-br transition-[scale] active:scale-90"
           >
             <svg viewBox="0 0 48 48" className="size-3/5 fill-none">
               <path

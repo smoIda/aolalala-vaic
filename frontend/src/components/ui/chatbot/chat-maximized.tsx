@@ -238,13 +238,35 @@ export function ChatMaximized({
         </header>
 
         <p className="text-grey-ink mt-2 text-center text-sm">
-          Always consult a licensed medical professional for health decisions.
+          Câu trả lời của AI chỉ mang tính chất tham khảo
         </p>
 
         {!state.chats.length && (
-          <div className="absolute top-1/2 left-1/2 flex -translate-1/2 flex-col items-center justify-center">
-            <h3 className="text-accent-ink text-xl font-bold">HeartCare AI</h3>
-            <h3 className="text-3xl">Ready when you are!</h3>
+          <div className="absolute top-1/2 left-1/2 flex -translate-1/2 flex-col items-center justify-center gap-y-2">
+            <h3 className="bg-accent-ink text-white-ink rounded-full px-3 py-1 text-sm font-bold">
+              HeartCare AI
+            </h3>
+            <p className="text-3xl font-bold">Hãy bắt đầu cuộc trò chuyện</p>
+
+            <svg viewBox="0 0 24 24" className="size-8 absolute -left-10 top-3 fill-none">
+              <path
+                d="M12 3L13.4302 8.31181C13.6047 8.96 13.692 9.28409 13.8642 9.54905C14.0166 9.78349 14.2165 9.98336 14.451 10.1358C14.7159 10.308 15.04 10.3953 15.6882 10.5698L21 12L15.6882 13.4302C15.04 13.6047 14.7159 13.692 14.451 13.8642C14.2165 14.0166 14.0166 14.2165 13.8642 14.451C13.692 14.7159 13.6047 15.04 13.4302 15.6882L12 21L10.5698 15.6882C10.3953 15.04 10.308 14.7159 10.1358 14.451C9.98336 14.2165 9.78349 14.0166 9.54905 13.8642C9.28409 13.692 8.96 13.6047 8.31181 13.4302L3 12L8.31181 10.5698C8.96 10.3953 9.28409 10.308 9.54905 10.1358C9.78349 9.98336 9.98336 9.78349 10.1358 9.54905C10.308 9.28409 10.3953 8.96 10.5698 8.31181L12 3Z"
+                className="stroke-grey-ink"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+
+            <svg viewBox="0 0 24 24" className="size-8 absolute -right-10 -bottom-5 fill-none">
+              <path
+                d="M12 3L13.4302 8.31181C13.6047 8.96 13.692 9.28409 13.8642 9.54905C14.0166 9.78349 14.2165 9.98336 14.451 10.1358C14.7159 10.308 15.04 10.3953 15.6882 10.5698L21 12L15.6882 13.4302C15.04 13.6047 14.7159 13.692 14.451 13.8642C14.2165 14.0166 14.0166 14.2165 13.8642 14.451C13.692 14.7159 13.6047 15.04 13.4302 15.6882L12 21L10.5698 15.6882C10.3953 15.04 10.308 14.7159 10.1358 14.451C9.98336 14.2165 9.78349 14.0166 9.54905 13.8642C9.28409 13.692 8.96 13.6047 8.31181 13.4302L3 12L8.31181 10.5698C8.96 10.3953 9.28409 10.308 9.54905 10.1358C9.78349 9.98336 9.98336 9.78349 10.1358 9.54905C10.308 9.28409 10.3953 8.96 10.5698 8.31181L12 3Z"
+                className="stroke-grey-ink"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
           </div>
         )}
 
