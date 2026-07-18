@@ -13,7 +13,7 @@ export const BaseChat: BaseChatProps = {
           id: "1",
           role: "bot",
           content:
-            "Hello! I'm CardioAI, your cardiovascular health assistant at HeartCare Hospital. I can help you schedule appointments, answer questions about heart health, explain procedures, or connect you with our cardiologists. How can I assist you today?",
+            "Xin chào, tôi là trợ lý ảo tại Bệnh viện Tim Hà Nội, tôi có thể giúp gì cho bạn?",
           createdAt: new Date().toISOString(),
         },
       ],

@@ -8,16 +8,14 @@ export function ContentProvider({ children }: { children: React.ReactNode }) {
   const { isDarkTheme } = useToggle();
 
   useEffect(() => {
+    document.documentElement.classList.toggle("dark", isDarkTheme);
+  }, [isDarkTheme]);
+
+  useEffect(() => {
     setMounted(true);
   });
 
   if (!mounted) return null;
 
-  return (
-    <main
-      className={`bg-white-ink min-h-dvh w-full overflow-hidden ${isDarkTheme && "dark"}`}
-    >
-      {children}
-    </main>
-  );
+  return <main className="min-h-dvh w-full overflow-hidden">{children}</main>;
 }

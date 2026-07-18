@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   --breakpoint-xs: 30rem;
@@ -17,17 +18,21 @@
 }
 
 .dark {
-  --color-ink: #fff;
-  --color-white-ink: #000;
-  --color-grey-ink: #9ba3b0;
+  /* Text */
+  --color-ink: #f3f6fb;
+  --color-white-ink: #0d1117;
+  --color-grey-ink: #8d98a8;
 
-  --color-accent-ink: #3d6889;
-  --color-accent-ink-soft: #4d7c9f;
+  /* Primary Accent */
+  --color-accent-ink: #67b8f3;
+  --color-accent-ink-soft: #8ecdf7;
 
-  --color-link-ink: #297c29;
-  --color-link-ink-hover: #6ad289;
+  /* Links */
+  --color-link-ink: #6ddc83;
+  --color-link-ink-hover: #98efad;
 
-  --color-alert-ink: #fb2c36;
+  /* Alerts */
+  --color-alert-ink: #ff5c67;
 }
 
 @layer utilities {
@@ -71,4 +76,6 @@ textarea {
 
 body {
   font-family: var(--font-custom);
+
+  color: var(--color-ink)
 }

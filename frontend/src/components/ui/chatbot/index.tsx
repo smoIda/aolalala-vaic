@@ -10,7 +10,8 @@ import { ChatMaximized } from "./chat-maximized";
 import { Chatbox } from "./chat-box";
 
 export function Chatbot() {
-  const { isChatbotOpen, setIsChatbotOpen } = useToggle();
+  const { isChatbotOpen, setIsChatbotOpen, isDarkTheme, setIsDarkTheme } =
+    useToggle();
   const [input, setInput] = useState("");
   const [state, dispatch] = useReducer(ChatAction, BaseChat);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -26,7 +27,10 @@ export function Chatbot() {
           input={input}
           setInput={setInput}
           dispatch={dispatch}
-          onClose={() => setIsMaximized(false)}
+          onClose={() => {
+            setIsDarkTheme(false);
+            setIsMaximized(false);
+          }}
           state={state}
         />
       ) : (

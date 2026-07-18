@@ -47,10 +47,10 @@ export function ChatInput({ input, setInput, dispatch }: InputProps) {
 
   return (
     <div className="mt-auto flex w-full shrink-0 flex-col items-center gap-2 px-4 py-2">
-      <div className="bg-grey-ink/10 flex w-full flex-col items-start gap-x-2 rounded-2xl px-4">
+      <div className="bg-grey-ink/10 flex w-full flex-col items-start gap-y-1 pb-2 rounded-2xl px-4">
         <textarea
           ref={textareaRef}
-          placeholder="Ask about symptoms, medications, appointments, or anything cardiovascular..."
+          placeholder="Ask about symptoms, medications, appointments,..."
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -94,9 +94,9 @@ export function ChatInput({ input, setInput, dispatch }: InputProps) {
 
       <span className="text-grey-ink text-sm">
         Bệnh viện Tim Hà Nội ·{" "}
-        <a href="/" className="text-accent-ink hover:underline">
+        <button className="text-accent-ink cursor-pointer hover:underline">
           Điều khoản dịch vụ
-        </a>
+        </button>
       </span>
     </div>
   );
