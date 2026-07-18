@@ -1,3 +1,5 @@
+import { timeoutSignal } from "./timeout.js";
+
 export type McpResult = {
   title: string;
   content: string;
@@ -13,6 +15,7 @@ export async function callMcpTool(toolName: string, query: string, limit = 5): P
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify({ query, limit }),
+    signal: timeoutSignal(),
   });
 
   if (!response.ok) {

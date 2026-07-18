@@ -106,6 +106,13 @@
 
 ```json
 {
+  "session": {
+    "id": "backend-generated-session-id",
+    "status": "active",
+    "currentFlow": null,
+    "currentState": null,
+    "context": {}
+  },
   "intent": {
     "intent": "hospital_information",
     "confidence": 0.95,

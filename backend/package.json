@@ -8,11 +8,12 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:chatbot": "tsx apps/chatbot-api/src/server.ts",
-    "dev:backoffice": "tsx apps/backoffice-api/src/server.ts",
-    "dev:mcp": "tsx packages/hert-hospital-mcp/src/server.ts",
-    "import:data": "tsx scripts/import-data.ts",
-    "seed:demo": "tsx scripts/seed-demo-knowledge.ts",
+    "dev:chatbot": "node --import tsx apps/chatbot-api/src/server.ts",
+    "dev:backoffice": "node --import tsx apps/backoffice-api/src/server.ts",
+    "dev:mcp": "node --import tsx packages/hert-hospital-mcp/src/server.ts",
+    "import:data": "node --import tsx scripts/import-data.ts",
+    "import:faq": "node --import tsx scripts/import-faq-sql.ts",
+    "seed:demo": "node --import tsx scripts/seed-demo-knowledge.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

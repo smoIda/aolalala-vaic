@@ -82,10 +82,15 @@ async function indexFaq(id: string) {
 }
 
 async function main() {
-    await pool.query("BEGIN");
+  await pool.query("BEGIN");
   try {
-    await pool.query("DELETE FROM knowledge_index WHERE entity_type IN ('process', 'preparation', 'faq')");
-    await pool.query("TRUNCATE processes, preparations, faqs CASCADE");
+    await pool.query("DELETE FROM knowledge_index WHERE source = 'demo_seed'");
+    await pool.query("DELETE FROM knowledge_index ki WHERE ki.entity_type = 'faq' AND NOT EXISTS (SELECT 1 FROM faqs f WHERE f.id = ki.entity_id)");
+    await pool.query("DELETE FROM knowledge_index ki WHERE ki.entity_type = 'process' AND NOT EXISTS (SELECT 1 FROM processes p WHERE p.id = ki.entity_id)");
+    await pool.query("DELETE FROM knowledge_index ki WHERE ki.entity_type = 'preparation' AND NOT EXISTS (SELECT 1 FROM preparations p WHERE p.id = ki.entity_id)");
+    await pool.query("DELETE FROM faqs WHERE source = 'demo_seed'");
+    await pool.query("DELETE FROM processes WHERE source = 'demo_seed'");
+    await pool.query("DELETE FROM preparations WHERE source = 'demo_seed'");
 
     const processRows = [
       {

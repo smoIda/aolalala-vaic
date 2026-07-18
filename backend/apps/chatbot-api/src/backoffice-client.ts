@@ -1,3 +1,5 @@
+import { timeoutSignal } from "./timeout.js";
+
 const backofficeApiUrl = process.env.BACKOFFICE_API_URL ?? "http://localhost:4000";
 const internalApiKey = process.env.INTERNAL_API_KEY ?? "dev-internal-key";
 
@@ -17,6 +19,7 @@ export async function createTicket(input: {
       "x-internal-api-key": internalApiKey,
     },
     body: JSON.stringify(input),
+    signal: timeoutSignal(),
   });
 
   if (!response.ok) {
@@ -42,6 +45,7 @@ export async function createBooking(input: {
       "x-internal-api-key": internalApiKey,
     },
     body: JSON.stringify(input),
+    signal: timeoutSignal(),
   });
 
   if (!response.ok) {

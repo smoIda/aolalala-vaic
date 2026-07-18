@@ -33,7 +33,7 @@ function registerTools(server: McpServer) {
   server.registerTool(
     "search_doctor",
     { title: "Search Doctor", description: "Search doctor data when available", inputSchema },
-    async () => asMcpText(await tools.search_doctor()),
+    async (input) => asMcpText(await tools.search_doctor(input)),
   );
   server.registerTool(
     "search_service",

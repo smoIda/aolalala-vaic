@@ -1,7 +1,7 @@
 meta {
-  name: Chat - Appointment
+  name: Chat - Appointment Time
   type: http
-  seq: 4
+  seq: 8
 }
 
 post {
@@ -16,6 +16,7 @@ headers {
 
 body:json {
   {
-    "message": "Tôi muốn đặt lịch khám"
+    "sessionId": "{{appointment_session_id}}",
+    "message": "Buổi sáng"
   }
 }

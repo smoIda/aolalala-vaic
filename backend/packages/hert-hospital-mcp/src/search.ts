@@ -80,15 +80,46 @@ export async function searchDepartment({ query, limit }: SearchOptions) {
   return searchNavigation({ query, limit });
 }
 
-export async function searchDoctor() {
-  return [
+export async function searchDoctor({ query, limit }: SearchOptions) {
+  const normalizedQuery = normalizeText(query);
+  const doctors: SearchResult[] = [
     {
-      title: "Doctor data unavailable",
-      content: "Hiện chưa có dữ liệu bác sĩ trong nguồn nội bộ.",
-      source: "system",
-      score: 0,
+      title: "BS Nguyễn Văn A",
+      content:
+        "Chuyên khoa: Tim mạch\nLịch demo: sáng mai 08:00-11:00\nĐịa điểm: Phòng 201, Tòa A, tầng 2",
+      source: "demo_doctor_schedule",
+      score: 1,
+      metadata: {
+        doctor_name: "BS Nguyễn Văn A",
+        department: "Tim mạch",
+        available_time: "sáng mai 08:00-11:00",
+        room: "Phòng 201",
+        building: "Tòa A",
+        floor: "Tầng 2",
+      },
+    },
+    {
+      title: "BS Trần Văn B",
+      content:
+        "Chuyên khoa: Tim mạch\nLịch demo: sáng mai 09:00-11:30\nĐịa điểm: Phòng 201, Tòa A, tầng 2",
+      source: "demo_doctor_schedule",
+      score: 0.95,
+      metadata: {
+        doctor_name: "BS Trần Văn B",
+        department: "Tim mạch",
+        available_time: "sáng mai 09:00-11:30",
+        room: "Phòng 201",
+        building: "Tòa A",
+        floor: "Tầng 2",
+      },
     },
   ];
+
+  const filtered = normalizedQuery.includes("tim") || normalizedQuery.includes("sang mai")
+    ? doctors
+    : doctors.map((doctor) => ({ ...doctor, score: 0.7 }));
+
+  return filtered.slice(0, normalizeLimit(limit));
 }
 
 export async function searchPrice({ query, limit }: SearchOptions) {
