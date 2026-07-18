@@ -35,7 +35,7 @@ export function Chatbot() {
       ) : (
         <>
           <div
-            className={`bg-white-ink ${isMinimized ? "h-16" : "h-150"} fixed right-1/2 bottom-25 flex w-11/12 max-w-105 min-w-75 translate-x-1/2 flex-col items-center overflow-hidden rounded-xl shadow-[-5px_10px_40px_-20px_rgba(37,99,235)] sm:right-8 sm:bottom-25 sm:translate-x-0 ${isChatbotOpen ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-10 opacity-0 select-none"} transition-[translate,opacity]`}
+            className={`bg-white-ink ${isMinimized ? "h-16" : "h-130"} fixed right-1/2 bottom-25 flex w-11/12 max-w-100 min-w-75 translate-x-1/2 flex-col items-center overflow-hidden rounded-xl shadow-[-5px_10px_40px_-20px_rgba(37,99,235)] sm:right-8 sm:bottom-25 sm:translate-x-0 ${isChatbotOpen ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-10 opacity-0 select-none"} transition-[translate,opacity]`}
           >
             <div className="bg-accent-ink flex w-full shrink-0 items-center justify-between px-4 py-2">
               <div className="relative flex items-center justify-center gap-x-3">
