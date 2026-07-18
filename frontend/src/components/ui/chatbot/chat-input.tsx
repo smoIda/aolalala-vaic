@@ -92,17 +92,10 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
           return (
             <button
               key={index}
-              onClick={() =>
-                dispatch({
-                  type: "SEND_MESSAGE",
-                  payload: {
-                    id: nanoid(),
-                    role: "user",
-                    content: prompt,
-                    createdAt: new Date().toISOString(),
-                  },
-                })
-              }
+              onClick={() => {
+                input = prompt;
+                handleSend();
+              }}
               className="border-grey-ink/40 text-grey-ink/80 hover:text-accent-ink hover:border-accent-ink cursor-pointer rounded-full border px-2 py-1 text-sm text-nowrap"
             >
               {prompt}

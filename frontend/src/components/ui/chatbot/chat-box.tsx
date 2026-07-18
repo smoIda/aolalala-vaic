@@ -1,10 +1,18 @@
 import { formatDate } from "@/lib/utils/date-formatter";
 import { BaseChatProps } from "./types";
+import { useEffect, useRef } from "react";
+import { formatText } from "@/lib/utils/text-formatter";
 
 export function Chatbox(state: BaseChatProps) {
+  const chatboxRef = useRef<HTMLDivElement | null>(null);
+
   const currentChat = state.chats.find(
     (chat) => chat.id === state.activeChatId,
   );
+
+  useEffect(() => {
+    chatboxRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [currentChat?.messages]);
 
   return (
     <div className="custom-scroll flex h-full w-full flex-col gap-y-6 overflow-x-hidden p-4">
@@ -16,7 +24,7 @@ export function Chatbox(state: BaseChatProps) {
           >
             {message.role === "user" ? (
               <div className="flex size-8 items-center justify-center rounded-full bg-pink-800">
-                <span className="text-white font-bold">JD</span>
+                <span className="font-bold text-white">JD</span>
               </div>
             ) : (
               <div className="bg-accent-ink flex size-8 items-center justify-center rounded-full">
@@ -41,18 +49,24 @@ export function Chatbox(state: BaseChatProps) {
             )}
 
             <div className="flex flex-col items-start gap-y-1">
-              <p
+              <div
                 key={message.id}
                 className={`${message.role === "user" ? "bg-accent-ink text-white-ink ml-auto rounded-br-md" : "mr-auto rounded-bl-md"} max-w-70 rounded-2xl px-4 py-2 wrap-break-word shadow-[0_4px_24px_rgba(155,163,176,0.4)]`}
               >
-                {message.content}
-              </p>
+                {formatText(message.content)}
+              </div>
 
-              <span className={`text-grey-ink text-sm ${message.role === "user" && "ml-auto"}`}>{formatDate(message.createdAt)}</span>
+              <span
+                className={`text-grey-ink text-sm ${message.role === "user" && "ml-auto"}`}
+              >
+                {formatDate(message.createdAt)}
+              </span>
             </div>
           </div>
         );
       })}
+
+      <span ref={chatboxRef} aria-hidden="true" />
     </div>
   );
 }
