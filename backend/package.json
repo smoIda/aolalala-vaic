@@ -1,0 +1,32 @@
+{
+  "name": "hert-hospital-platform",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:chatbot": "tsx apps/chatbot-api/src/server.ts",
+    "dev:backoffice": "tsx apps/backoffice-api/src/server.ts",
+    "dev:mcp": "tsx packages/hert-hospital-mcp/src/server.ts",
+    "import:data": "tsx scripts/import-data.ts",
+    "seed:demo": "tsx scripts/seed-demo-knowledge.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.17.5",
+    "better-auth": "^1.3.4",
+    "fastify": "^5.6.0",
+    "pg": "^8.16.3",
+    "xlsx": "^0.18.5",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@types/pg": "^8.15.5",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.0"
+  }
+}

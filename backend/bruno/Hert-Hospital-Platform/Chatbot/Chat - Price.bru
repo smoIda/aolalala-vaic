@@ -1,0 +1,21 @@
+meta {
+  name: Chat - Price
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{chatbot_url}}/chat
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "message": "Giá khám bệnh bao nhiêu?"
+  }
+}

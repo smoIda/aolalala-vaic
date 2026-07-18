@@ -1,0 +1,22 @@
+meta {
+  name: Search Policy
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{mcp_url}}/tools/search_policy
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "query": "tôi cần chỉ dẫn để đăng ký khám",
+    "limit": 5
+  }
+}

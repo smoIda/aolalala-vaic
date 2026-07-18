@@ -1,0 +1,109 @@
+services:
+  chatbot-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: chatbot
+      POSTGRES_USER: chatbot
+      POSTGRES_PASSWORD: chatbot
+    ports:
+      - "15433:5432"
+    volumes:
+      - chatbot-postgres-data:/var/lib/postgresql/data
+      - ./sql/chatbot:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U chatbot -d chatbot"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  backoffice-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: backoffice
+      POSTGRES_USER: backoffice
+      POSTGRES_PASSWORD: backoffice
+    ports:
+      - "15434:5432"
+    volumes:
+      - backoffice-postgres-data:/var/lib/postgresql/data
+      - ./sql/backoffice:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U backoffice -d backoffice"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  hert-hospital-mcp:
+    build:
+      context: .
+      dockerfile: docker/node.Dockerfile
+    command: npm run dev:mcp
+    environment:
+      MCP_TRANSPORT: http
+      MCP_HTTP_PORT: 5000
+      CHATBOT_DATABASE_URL: postgres://chatbot:chatbot@chatbot-postgres:5432/chatbot
+    ports:
+      - "15000:5000"
+    depends_on:
+      chatbot-postgres:
+        condition: service_healthy
+
+  backoffice-api:
+    build:
+      context: .
+      dockerfile: docker/node.Dockerfile
+    command: npm run dev:backoffice
+    environment:
+      BACKOFFICE_PORT: 4000
+      BACKOFFICE_DATABASE_URL: postgres://backoffice:backoffice@backoffice-postgres:5432/backoffice
+      BETTER_AUTH_SECRET: replace-with-a-long-random-secret
+      BETTER_AUTH_URL: http://localhost:4000
+      INTERNAL_API_KEY: dev-internal-key
+    ports:
+      - "4000:4000"
+    depends_on:
+      backoffice-postgres:
+        condition: service_healthy
+
+  chatbot-api:
+    build:
+      context: .
+      dockerfile: docker/node.Dockerfile
+    command: npm run dev:chatbot
+    environment:
+      CHATBOT_PORT: 3000
+      CHATBOT_DATABASE_URL: postgres://chatbot:chatbot@chatbot-postgres:5432/chatbot
+      MCP_HTTP_URL: http://hert-hospital-mcp:5000
+      BACKOFFICE_API_URL: http://backoffice-api:4000
+      INTERNAL_API_KEY: dev-internal-key
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-~openai/gpt-latest}
+      OPENROUTER_HTTP_REFERER: ${OPENROUTER_HTTP_REFERER:-http://localhost:3000}
+      OPENROUTER_APP_TITLE: ${OPENROUTER_APP_TITLE:-Hert Hospital Chatbot}
+      AI_PROVIDER_LOG_ENABLED: ${AI_PROVIDER_LOG_ENABLED:-false}
+      AI_PROVIDER_LOG_FILE: ${AI_PROVIDER_LOG_FILE:-/app/logs/ai-provider.log}
+    volumes:
+      - ./logs:/app/logs
+    ports:
+      - "3000:3000"
+    depends_on:
+      chatbot-postgres:
+        condition: service_healthy
+      hert-hospital-mcp:
+        condition: service_started
+      backoffice-api:
+        condition: service_started
+
+  adminer:
+    image: adminer:4
+    ports:
+      - "18080:8080"
+    depends_on:
+      chatbot-postgres:
+        condition: service_healthy
+      backoffice-postgres:
+        condition: service_healthy
+
+volumes:
+  chatbot-postgres-data:
+  backoffice-postgres-data:

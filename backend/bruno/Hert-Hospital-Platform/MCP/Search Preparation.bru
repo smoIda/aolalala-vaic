@@ -1,0 +1,22 @@
+meta {
+  name: Search Preparation
+  type: http
+  seq: 6
+}
+
+post {
+  url: {{mcp_url}}/tools/search_preparation
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "query": "tôi cần mang gì khi đi khám",
+    "limit": 5
+  }
+}
