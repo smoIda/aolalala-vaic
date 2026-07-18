@@ -10,4 +10,4 @@ COPY data ./data
 
 RUN npm ci || npm install
 
-EXPOSE 3000 4000 5000
+EXPOSE 3000 5000

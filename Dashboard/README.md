@@ -16,11 +16,11 @@ ThuTrang/
 │   │   ├── main.py           # khởi tạo app, CORS, mount frontend tĩnh
 │   │   ├── config.py         # hằng số, đường dẫn, nhãn hiển thị
 │   │   ├── models/           # Pydantic schema
-│   │   ├── data/             # seed_tickets.json + classification_rules.json
-│   │   ├── repositories/     # kho ticket + kho user in-memory
+│   │   ├── data/             # classification_rules.json + dữ liệu tham chiếu
+│   │   ├── repositories/     # ticket PostgreSQL + user in-memory
 │   │   ├── services/         # classifier (rule engine), ticket_service, auth_service
 │   │   ├── dependencies.py   # get_current_user (bảo vệ API bằng Bearer token)
-│   │   └── routers/          # /api/auth, /api/tickets, /api/classify, /api/meta
+│   │   └── routers/          # /api/auth, /api/tickets, /api/classify, /api/internal, /api/meta
 │   ├── requirements.txt
 │   └── run.py
 └── frontend/         # Giao diện dashboard
@@ -32,13 +32,14 @@ ThuTrang/
 ## Yêu cầu
 
 - Python 3.10+ (khuyến nghị dùng virtualenv/conda)
+- PostgreSQL chatbot DB đang chạy (mặc định `localhost:15433/chatbot`)
 
 ## Cài đặt & chạy
 
 ```bash
 cd backend
 pip install -r requirements.txt
-python run.py
+DASHBOARD_DATABASE_URL=postgres://chatbot:chatbot@localhost:15433/chatbot python run.py
 ```
 
 Hoặc:
@@ -56,6 +57,48 @@ Mở trình duyệt:
 > Backend phục vụ luôn frontend nên chỉ cần **một lệnh**. Muốn chạy frontend riêng
 > (vd `python -m http.server` trong thư mục `frontend/`), sửa `API_BASE_URL` trong
 > `frontend/js/config.js` thành `http://127.0.0.1:8000` (CORS đã bật sẵn).
+
+## Chạy bằng Docker
+
+```bash
+cd Dashboard
+docker compose up --build
+```
+
+Docker mặc định dùng:
+
+```bash
+DASHBOARD_DATABASE_URL=postgres://chatbot:chatbot@host.docker.internal:15433/chatbot
+```
+
+Mở trình duyệt:
+
+- **Dashboard:** http://127.0.0.1:8000/
+- **API docs (Swagger):** http://127.0.0.1:8000/docs
+
+Chạy nền:
+
+```bash
+cd Dashboard
+docker compose up -d --build
+```
+
+Dừng container:
+
+```bash
+cd Dashboard
+docker compose down
+```
+
+Hoặc dùng Makefile:
+
+```bash
+cd Dashboard
+make up
+make logs
+make health
+make down
+```
 
 ## Đăng nhập
 
@@ -104,10 +147,15 @@ cơ chế xác thực.
 | PATCH  | `/api/tickets/{id}` 🔒        | Đổi trạng thái và/hoặc loại ticket                 |
 | POST   | `/api/tickets/{id}/notes` 🔒  | Thêm trao đổi nội bộ                               |
 | PATCH  | `/api/tickets/{id}/assignee` 🔒 | Phân công người xử lý                            |
+| POST   | `/api/internal/tickets`       | Chatbot backend tạo ticket bằng `x-internal-api-key` |
 | POST   | `/api/classify` 🔒            | Phân loại câu hỏi, tạo ticket nếu quy tắc yêu cầu  |
 | GET    | `/api/meta/ticket-types` 🔒   | Danh sách loại ticket cho dropdown lọc             |
 
 🔒 = cần header `Authorization: Bearer <token>` (lấy từ các endpoint `/api/auth/*`).
+
+`/api/internal/tickets` không dùng Bearer token của dashboard UI. Endpoint này chỉ dành
+cho backend chatbot và yêu cầu header `x-internal-api-key`, giá trị lấy từ biến môi trường
+`INTERNAL_API_KEY`.
 
 ### Ví dụ phân loại
 
@@ -137,9 +185,8 @@ JSON này, không cần sửa code.
 
 ## Lưu ý
 
-- Dữ liệu ticket lưu **in-memory**, seed 8 ticket mẫu; restart server sẽ reset về trạng thái
-  ban đầu. Đổi sang SQLite/PostgreSQL sau này chỉ cần thay lớp `repositories/ticket_repo.py`,
-  giữ nguyên interface.
+- Dữ liệu ticket lưu trong bảng `dashboard_tickets` của chatbot PostgreSQL DB, không seed
+  lại từ `seed_tickets.json`; restart Dashboard không làm mất ticket.
 - Tài khoản người dùng cũng lưu **in-memory** (`repositories/user_repo.py`), cùng lý do trên;
   tài khoản admin mặc định được seed lại mỗi lần khởi động.
 - Chuông thông báo (góc phải header) chỉ hiện chấm vàng khi có ticket mới xuất hiện kể từ lần

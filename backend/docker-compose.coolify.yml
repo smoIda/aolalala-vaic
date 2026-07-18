@@ -17,24 +17,6 @@ services:
     networks:
       - internal
 
-  backoffice-postgres:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${BACKOFFICE_DB_NAME:-backoffice}
-      POSTGRES_USER: ${BACKOFFICE_DB_USER:-backoffice}
-      POSTGRES_PASSWORD: ${BACKOFFICE_DB_PASSWORD:?required}
-    volumes:
-      - backoffice-pg-data:/var/lib/postgresql/data
-      - ./sql/backoffice:/docker-entrypoint-initdb.d:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${BACKOFFICE_DB_USER:-backoffice} -d ${BACKOFFICE_DB_NAME:-backoffice}"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-    networks:
-      - internal
-
   import-data:
     build:
       context: .
@@ -66,25 +48,6 @@ services:
     networks:
       - internal
 
-  backoffice-api:
-    build:
-      context: .
-      dockerfile: docker/production.Dockerfile
-    command: npx tsx apps/backoffice-api/src/server.ts
-    restart: unless-stopped
-    environment:
-      BACKOFFICE_PORT: 4000
-      BACKOFFICE_DATABASE_URL: postgres://${BACKOFFICE_DB_USER:-backoffice}:${BACKOFFICE_DB_PASSWORD}@backoffice-postgres:5432/${BACKOFFICE_DB_NAME:-backoffice}
-      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET:?required}
-      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost:4000}
-      INTERNAL_API_KEY: ${INTERNAL_API_KEY:?required}
-    depends_on:
-      backoffice-postgres:
-        condition: service_healthy
-    networks:
-      - internal
-      - web
-
   chatbot-api:
     build:
       context: .
@@ -95,7 +58,7 @@ services:
       CHATBOT_PORT: 3000
       CHATBOT_DATABASE_URL: postgres://${CHATBOT_DB_USER:-chatbot}:${CHATBOT_DB_PASSWORD}@chatbot-postgres:5432/${CHATBOT_DB_NAME:-chatbot}
       MCP_HTTP_URL: http://hert-hospital-mcp:5000
-      BACKOFFICE_API_URL: http://backoffice-api:4000
+      DASHBOARD_API_URL: ${DASHBOARD_API_URL:?required}
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:?required}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-~openai/gpt-latest}
@@ -110,15 +73,12 @@ services:
         condition: service_healthy
       hert-hospital-mcp:
         condition: service_started
-      backoffice-api:
-        condition: service_started
     networks:
       - internal
       - web
 
 volumes:
   chatbot-pg-data:
-  backoffice-pg-data:
   ai-logs:
 
 networks:

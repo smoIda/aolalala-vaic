@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import { z } from "zod";
-import { createBooking, createTicket } from "./backoffice-client.js";
+import { createDashboardTicket } from "./dashboard-client.js";
 import { closePool, pool } from "./db.js";
 import { classifyIntent, generateGroundedAnswer, generateSessionRecallAnswer, generateSessionSummary } from "./openrouter.js";
 import { callMcpTool, formatContext } from "./mcp-client.js";
@@ -23,12 +23,26 @@ const chatSchema = z.object({
     .object({
       name: z.string().optional(),
       phone: z.string().optional(),
+      email: z.string().optional(),
     })
     .strict()
     .optional(),
 }).strict();
 
 const app = Fastify({ logger: true });
+
+app.addHook("onRequest", async (request, reply) => {
+  reply.header("Access-Control-Allow-Origin", "*");
+  reply.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  reply.header(
+    "Access-Control-Allow-Headers",
+    request.headers["access-control-request-headers"] ?? "content-type",
+  );
+
+  if (request.method === "OPTIONS") {
+    return reply.status(204).send();
+  }
+});
 
 app.get("/health", async () => {
   await pool.query("SELECT 1");
@@ -82,11 +96,14 @@ app.post("/chat", async (request, reply) => {
   }
 
   const intent = await classifyIntent(input.message);
-  session = await updateSession(session.id, {
-    currentFlow: session.currentFlow,
-    currentState: session.currentState,
-    context: mergeConversationMemory(session.context, input.message, intent.entities),
-  });
+  const shouldHandleHumanHandoff = shouldContinueComplaintFlow(session) || isHumanHandoffIntent(intent, session, input.message);
+  if (!shouldHandleHumanHandoff) {
+    session = await updateSession(session.id, {
+      currentFlow: session.currentFlow,
+      currentState: session.currentState,
+      context: mergeConversationMemory(session.context, input.message, intent.entities),
+    });
+  }
 
   let responseText: string;
   let context = "";
@@ -97,6 +114,11 @@ app.post("/chat", async (request, reply) => {
       "Đây có thể là tình trạng cần cấp cứu. Anh/chị vui lòng gọi 115 hoặc đến khoa Cấp cứu gần nhất ngay. " +
       "Nếu đang ở trong bệnh viện, tôi có thể hướng dẫn đường đến Khoa Cấp cứu.";
     action = { type: "emergency_response", signals: intent.emergencySignals };
+  } else if (shouldHandleHumanHandoff) {
+    const result = await handleComplaintFlow(session, input.message, intent);
+    session = result.session;
+    responseText = result.responseText;
+    action = result.action;
   } else if (shouldContinueNavigationFlow(session, intent.intent)) {
     const result = await handleNavigationFlow(session, input.message);
     session = result.session;
@@ -239,12 +261,136 @@ function shouldContinueAppointmentFlow(session: ChatSession, intent: string): bo
 
 function shouldContinueMedicalFlow(session: ChatSession, intent: string): boolean {
   if (session.currentFlow !== "medical_consultation" || !session.currentState) return false;
+  if (session.currentState === "waiting_ticket_contact") return true;
   return ["medical_consultation", "unknown"].includes(intent);
 }
 
 function shouldContinueNavigationFlow(session: ChatSession, intent: string): boolean {
   if (session.currentFlow !== "navigation" || !session.currentState) return false;
   return ["navigation", "unknown"].includes(intent);
+}
+
+function shouldContinueComplaintFlow(session: ChatSession): boolean {
+  return session.currentFlow === "complaint_handling" && session.currentState === "waiting_complaint_contact";
+}
+
+function isHumanHandoffIntent(intent: Record<string, unknown>, session: ChatSession, message: string): boolean {
+  if (intent.intent === "emergency" || intent.intent === "medical_consultation") return false;
+
+  const intentText = normalizeText([
+    getString(intent.flow),
+    getString(intent.action),
+    getString(intent.intent),
+    getString(session.context.session_summary),
+  ].filter(Boolean).join(" "));
+
+  return isComplaintMessage(message) ||
+    Boolean(intent.needsHuman) ||
+    [
+      "complaint handling",
+      "log complaint",
+      "complaint",
+      "khieu nai",
+      "phan hoi tieu cuc",
+      "phan anh",
+      "khong hai long",
+      "needshuman",
+    ].some((phrase) => intentText.includes(phrase));
+}
+
+function isComplaintMessage(message: string): boolean {
+  const text = normalizeText(message);
+  const hasComplaintTopic = [
+    "dich vu",
+    "benh vien",
+    "nhan vien",
+    "bac si",
+    "le tan",
+    "thai do",
+    "cho doi",
+    "kham",
+  ].some((word) => text.includes(word));
+  const hasNegativeSignal = [
+    "te",
+    "qua te",
+    "rat te",
+    "khong hai long",
+    "khieu nai",
+    "phan anh",
+    "phan hoi",
+    "buc xuc",
+    "kho chiu",
+    "cham",
+    "lau",
+    "vl",
+    "vcl",
+    "cc",
+  ].some((word) => text.includes(word));
+
+  return hasComplaintTopic && hasNegativeSignal;
+}
+
+async function handleComplaintFlow(
+  session: ChatSession,
+  message: string,
+  intent: Record<string, unknown>,
+) {
+  const context: Record<string, unknown> = {
+    ...session.context,
+    complaint_message: getString(session.context.complaint_message) ?? message.trim(),
+    complaint_latest_message: message.trim(),
+    complaint_intent: session.context.complaint_intent ?? intent,
+    complaint_latest_intent: intent,
+  };
+
+  if (!getString(context.patient_name) || (!getString(context.patient_phone) && !getString(context.patient_email))) {
+    const updated = await updateSession(session.id, {
+      currentFlow: "complaint_handling",
+      currentState: "waiting_complaint_contact",
+      context,
+    });
+
+    return {
+      session: updated,
+      responseText: "Anh/chị vui lòng cho biết họ tên và số điện thoại để bệnh viện liên hệ xử lý phản hồi này.",
+      action: { type: "session_state_updated", flow: "complaint_handling", state: "waiting_complaint_contact" },
+    };
+  }
+
+  return createComplaintTicket(session, context);
+}
+
+async function createComplaintTicket(session: ChatSession, context: Record<string, unknown>) {
+  const summary = getString(context.session_summary);
+  const complaintMessage = getString(context.complaint_message) ?? getString(context.complaint_latest_message) ?? "Phản hồi/khiếu nại từ chatbot";
+  const latestMessage = getString(context.complaint_latest_message);
+  const description = [
+    `Nội dung phản hồi: ${complaintMessage}`,
+    latestMessage && latestMessage !== complaintMessage && isComplaintMessage(latestMessage) ? `Tin nhắn mới nhất: ${latestMessage}` : null,
+    summary ? `Tóm tắt session: ${summary}` : null,
+  ].filter(Boolean).join("\n\n");
+
+  const ticket = await createDashboardTicket({
+    title: "Phản hồi/khiếu nại từ chatbot",
+    description,
+    priority: "high",
+    ticketType: "complaint",
+    patientName: getString(context.patient_name),
+    patientPhone: getString(context.patient_phone),
+    patientEmail: getString(context.patient_email),
+    metadata: { sessionId: session.id, context, sourceFlow: "complaint_handling" },
+  });
+  const updated = await updateSession(session.id, {
+    currentFlow: null,
+    currentState: null,
+    context: { ...context, last_ticket: ticket },
+  });
+
+  return {
+    session: updated,
+    responseText: "Tôi đã ghi nhận phản hồi của anh/chị và chuyển đến bộ phận phụ trách. Bệnh viện sẽ liên hệ lại để hỗ trợ xử lý.",
+    action: { type: "ticket_created", ticketType: "complaint", ticket },
+  };
 }
 
 async function startNavigationFlow(session: ChatSession, message: string, entities: Record<string, unknown> = {}) {
@@ -259,7 +405,7 @@ async function startNavigationFlow(session: ChatSession, message: string, entiti
     getString(session.context.destination) ??
     getString(session.context.last_department);
   const destinationDepartment = departmentFromDestination(destination);
-  const context = {
+  const context: Record<string, unknown> = {
     ...session.context,
     origin: origin ?? null,
     destination,
@@ -297,7 +443,7 @@ async function handleNavigationFlow(session: ChatSession, message: string) {
     getString(session.context.destination) ??
     getString(session.context.last_department);
   const destinationDepartment = departmentFromDestination(destination) ?? getString(session.context.department);
-  const context = {
+  const context: Record<string, unknown> = {
     ...session.context,
     origin: origin ?? null,
     destination: destination ?? null,
@@ -358,22 +504,26 @@ async function handleNavigationFlow(session: ChatSession, message: string) {
 
 async function startMedicalConsultationFlow(session: ChatSession, message: string) {
   const symptom = extractSymptom(message) ?? message.trim();
-  const context = {
+  const context: Record<string, unknown> = {
     ...session.context,
     symptom,
     symptoms: [...asStringArray(session.context.symptoms), symptom],
   };
+  if (getString(context.patient_name) && (getString(context.patient_phone) || getString(context.patient_email))) {
+    return continueTicketCreation(session, context);
+  }
+
   const updated = await updateSession(session.id, {
     currentFlow: "medical_consultation",
-    currentState: "waiting_consultation_choice",
+    currentState: "waiting_ticket_contact",
     context,
   });
 
   return {
     session: updated,
     responseText:
-      "Tôi không thể chẩn đoán bệnh qua chat, nhưng có thể hỗ trợ:\n1. Đặt lịch khám\n2. Gửi yêu cầu tư vấn tới bệnh viện\n3. Gọi hotline/cấp cứu nếu triệu chứng nghiêm trọng\n\nAnh/chị muốn chọn phương án nào?",
-    action: { type: "session_state_updated", flow: "medical_consultation", state: "waiting_consultation_choice" },
+      "Tôi không thể chẩn đoán bệnh qua chat. Anh/chị vui lòng cung cấp họ tên và số điện thoại hoặc email để bệnh viện liên hệ hỗ trợ.",
+    action: { type: "session_state_updated", flow: "medical_consultation", state: "waiting_ticket_contact" },
   };
 }
 
@@ -426,7 +576,7 @@ async function handleMedicalConsultationFlow(session: ChatSession, message: stri
 async function continueTicketCreation(session: ChatSession, context: Record<string, unknown>) {
   const missing: string[] = [];
   if (!getString(context.patient_name)) missing.push("họ tên");
-  if (!getString(context.patient_phone)) missing.push("số điện thoại");
+  if (!getString(context.patient_phone) && !getString(context.patient_email)) missing.push("số điện thoại hoặc email");
 
   if (missing.length) {
     const updated = await updateSession(session.id, {
@@ -436,18 +586,19 @@ async function continueTicketCreation(session: ChatSession, context: Record<stri
     });
     return {
       session: updated,
-      responseText: `Anh/chị vui lòng cho biết ${missing.join(" và ")} để tôi tạo yêu cầu tư vấn.`,
+      responseText: `Anh/chị vui lòng cung cấp ${missing.join(" và ")} để tôi tạo yêu cầu tư vấn.`,
       action: { type: "session_state_updated", flow: "medical_consultation", state: "waiting_ticket_contact" },
     };
   }
 
-  const ticket = await createTicket({
+  const ticket = await createDashboardTicket({
     title: "Yêu cầu tư vấn y tế từ chatbot",
     description: asStringArray(context.symptoms).join("\n") || getString(context.symptom) || "Yêu cầu tư vấn y tế từ chatbot",
     priority: "high",
     ticketType: "medical_consultation",
     patientName: getString(context.patient_name),
     patientPhone: getString(context.patient_phone),
+    patientEmail: getString(context.patient_email),
     metadata: { sessionId: session.id, context },
   });
   const updated = await updateSession(session.id, {
@@ -458,9 +609,28 @@ async function continueTicketCreation(session: ChatSession, context: Record<stri
 
   return {
     session: updated,
-    responseText: "Tôi đã tạo yêu cầu tư vấn cho bệnh viện. Bộ phận chuyên môn sẽ liên hệ lại với anh/chị.",
+    responseText: formatTicketCreatedResponse(ticket, context),
     action: { type: "ticket_created", ticket },
   };
+}
+
+function formatTicketCreatedResponse(ticket: unknown, context: Record<string, unknown>): string {
+  const ticketRecord = typeof ticket === "object" && ticket !== null ? ticket as Record<string, unknown> : {};
+  const ticketId = getString(ticketRecord.id) ?? getString((ticketRecord.ticket as Record<string, unknown> | undefined)?.id);
+  const patientName = getString(context.patient_name) ?? "Chưa rõ";
+  const patientPhone = getString(context.patient_phone);
+  const patientEmail = getString(context.patient_email);
+  const symptom = asStringArray(context.symptoms).join(", ") || getString(context.symptom) || "Yêu cầu tư vấn y tế";
+  const contact = [patientPhone ? `SĐT: ${patientPhone}` : null, patientEmail ? `Email: ${patientEmail}` : null]
+    .filter(Boolean)
+    .join(" | ");
+
+  return [
+    `Tôi đã tạo ticket tư vấn thành công${ticketId ? ` (${ticketId})` : ""}.`,
+    `Thông tin đã nhận: Họ tên: ${patientName}${contact ? ` | ${contact}` : ""}.`,
+    `Nội dung cần tư vấn: ${symptom}.`,
+    "Chúng tôi đã nhận được yêu cầu và bộ phận chuyên môn sẽ liên hệ lại với anh/chị.",
+  ].join("\n");
 }
 
 async function handleAppointmentFlow(session: ChatSession, message: string) {
@@ -484,16 +654,21 @@ async function handleAppointmentFlow(session: ChatSession, message: string) {
 }
 
 async function completeAppointmentBooking(session: ChatSession, context: Record<string, unknown>) {
-  const booking = await createBooking({
+  const appointmentTicket = await createDashboardTicket({
+    title: "Yêu cầu đặt lịch khám từ chatbot",
+    description: [
+      `Khoa: ${getString(context.department) ?? getString(context.last_department) ?? "Chưa rõ"}`,
+      `Bác sĩ: ${getString(context.doctor) ?? "Không yêu cầu bác sĩ cụ thể"}`,
+      `Ngày: ${getString(context.date) ?? getString(context.preferred_date) ?? "Chưa rõ"}`,
+      `Giờ: ${getString(context.time) ?? getString(context.preferred_time) ?? "Chưa rõ"}`,
+    ].join("\n"),
+    priority: "normal",
+    ticketType: "Đặt lịch khám đặc biệt",
     patientName: getString(context.patient_name),
     patientPhone: getString(context.patient_phone),
-    department: getString(context.department) ?? getString(context.last_department),
-    preferredDate: getString(context.date) ?? getString(context.preferred_date),
-    preferredTime: getString(context.time) ?? getString(context.preferred_time),
-    note: `Đặt lịch từ chatbot session ${session.id}`,
-    metadata: { sessionId: session.id, context },
+    metadata: { sessionId: session.id, context, sourceFlow: "appointment" },
   });
-  const updatedContext = { ...context, last_booking: booking };
+  const updatedContext = { ...context, last_appointment_ticket: appointmentTicket };
   const updated = await updateSession(session.id, {
     currentFlow: null,
     currentState: null,
@@ -503,7 +678,7 @@ async function completeAppointmentBooking(session: ChatSession, context: Record<
   return {
     session: updated,
     responseText: "Tôi đã ghi nhận yêu cầu đặt lịch. Bệnh viện sẽ xác nhận lịch hẹn trước khi cuộc hẹn có hiệu lực.",
-    action: { type: "booking_requested", booking },
+    action: { type: "appointment_ticket_created", ticket: appointmentTicket },
   };
 }
 
@@ -558,12 +733,15 @@ function appointmentQuestion(state: string | null, context: Record<string, unkno
 function mergeProfileMemory(
   context: Record<string, unknown>,
   message: string,
-  userProfile?: { name?: string; phone?: string },
+  userProfile?: { name?: string; phone?: string; email?: string },
 ) {
+  const phone = userProfile?.phone ?? extractPhone(message) ?? getString(context.patient_phone);
+  const email = userProfile?.email ?? extractEmail(message) ?? getString(context.patient_email);
   return {
     ...context,
-    patient_name: userProfile?.name ?? extractPatientName(message) ?? context.patient_name ?? null,
-    patient_phone: userProfile?.phone ?? extractPhone(message) ?? context.patient_phone ?? null,
+    patient_name: userProfile?.name ?? extractPatientName(message, { phone, email }) ?? context.patient_name ?? null,
+    patient_phone: phone ?? null,
+    patient_email: email ?? null,
   };
 }
 
@@ -817,14 +995,59 @@ function extractSymptom(message: string): string | null {
   return found.length ? found.join(", ") : null;
 }
 
-function extractPatientName(message: string): string | null {
-  const match = message.trim().match(/(?:tên tôi là|tôi tên là|mình tên là|tên là)\s+(.+)/i);
-  return match?.[1] ? normalizeSlot(match[1]) : null;
+function extractPatientName(message: string, contact?: { phone?: string | null; email?: string | null }): string | null {
+  const explicit = message.trim().match(/(?:tên tôi là|tôi tên là|mình tên là|tên là|họ tên là|ho ten la)\s+(.+)/i);
+  if (explicit?.[1]) return cleanupPatientName(explicit[1], contact);
+  if (!contact?.phone && !contact?.email && !extractPhone(message) && !extractEmail(message)) return null;
+  const rawName = explicit?.[1] ?? inferPatientNameFromContactMessage(message, contact);
+  return rawName ? cleanupPatientName(rawName, contact) : null;
 }
 
 function extractPhone(message: string): string | null {
   const match = message.match(/(?:\+?84|0)\d{8,10}/);
   return match?.[0] ?? null;
+}
+
+function extractEmail(message: string): string | null {
+  const match = message.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i);
+  return match?.[0] ?? null;
+}
+
+function inferPatientNameFromContactMessage(message: string, contact?: { phone?: string | null; email?: string | null }): string | null {
+  let candidate = message.trim();
+  const phone = contact?.phone ?? extractPhone(message);
+  const email = contact?.email ?? extractEmail(message);
+
+  if (phone) candidate = candidate.replace(phone, " ");
+  if (email) candidate = candidate.replace(email, " ");
+
+  candidate = candidate
+    .replace(/(?:số điện thoại|sdt|sđt|phone|email|mail|liên hệ|lien he|của tôi là|cua toi la|là|la)\s*[:：-]?/gi, " ")
+    .replace(/[<>()\[\]{}]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!candidate || /\d/.test(candidate)) return null;
+  if (normalizeText(candidate).split(" ").length < 2) return null;
+  return candidate;
+}
+
+function cleanupPatientName(value: string, contact?: { phone?: string | null; email?: string | null }): string | null {
+  let candidate = value;
+  const phone = contact?.phone ?? extractPhone(value);
+  const email = contact?.email ?? extractEmail(value);
+
+  if (phone) candidate = candidate.replace(phone, " ");
+  if (email) candidate = candidate.replace(email, " ");
+
+  candidate = candidate
+    .replace(/(?:số điện thoại|sdt|sđt|phone|email|mail|liên hệ|lien he)\s*[:：-]?/gi, " ")
+    .replace(/[<>()\[\]{}]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!candidate || /\d/.test(candidate)) return null;
+  return normalizeSlot(candidate);
 }
 
 function getString(value: unknown): string | null {

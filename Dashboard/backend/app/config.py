@@ -4,6 +4,7 @@ Gom mọi hằng số dùng chung ở một chỗ để dễ chỉnh sửa / m�
 """
 
 from pathlib import Path
+import os
 
 # ---- Đường dẫn ----
 BASE_DIR = Path(__file__).resolve().parent          # .../backend/app
@@ -55,3 +56,12 @@ DEFAULT_ADMIN_EMAIL = "admin@bvtimhanoi.vn"
 DEFAULT_ADMIN_PASSWORD = "Admin@123"
 DEFAULT_ADMIN_NAME = "Admin"
 DEFAULT_ADMIN_ROLE = "Quản trị viên"
+
+# Shared secret cho backend chatbot đẩy ticket vào dashboard.
+INTERNAL_API_KEY = os.getenv("INTERNAL_API_KEY", "dev-internal-key")
+
+# Dashboard dùng chung Postgres của backend chatbot để lưu ticket bền vững.
+DASHBOARD_DATABASE_URL = os.getenv(
+    "DASHBOARD_DATABASE_URL",
+    "postgres://chatbot:chatbot@localhost:15433/chatbot",
+)

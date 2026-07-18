@@ -176,6 +176,37 @@ CREATE TABLE IF NOT EXISTS ticket_label_rules (
 
 CREATE INDEX IF NOT EXISTS ticket_label_rules_search_trgm_idx ON ticket_label_rules USING gin (search_text gin_trgm_ops);
 
+CREATE TABLE IF NOT EXISTS dashboard_tickets (
+  id TEXT PRIMARY KEY,
+  question TEXT NOT NULL,
+  full_question TEXT NOT NULL,
+  ticket_type TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed')),
+  priority TEXT CHECK (priority IN ('cao', 'thuong', 'khan')),
+  data_form_code TEXT,
+  data_form_name TEXT,
+  sender JSONB NOT NULL,
+  assignee JSONB,
+  notes JSONB NOT NULL DEFAULT '[]'::jsonb,
+  suggested_action TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS dashboard_tickets_status_idx ON dashboard_tickets(status);
+CREATE INDEX IF NOT EXISTS dashboard_tickets_ticket_type_idx ON dashboard_tickets(ticket_type);
+CREATE INDEX IF NOT EXISTS dashboard_tickets_created_at_idx ON dashboard_tickets(created_at DESC);
+CREATE SEQUENCE IF NOT EXISTS dashboard_ticket_seq START WITH 1;
+
+SELECT setval(
+  'dashboard_ticket_seq',
+  greatest(
+    coalesce((SELECT max((regexp_match(id, '[0-9]+$'))[1]::bigint) FROM dashboard_tickets), 0),
+    1
+  ),
+  coalesce((SELECT count(*) > 0 FROM dashboard_tickets), false)
+);
+
 CREATE TABLE IF NOT EXISTS chat_sessions (
   id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
   user_id TEXT,
@@ -223,4 +254,9 @@ $$ LANGUAGE plpgsql;
 DROP TRIGGER IF EXISTS chat_sessions_touch_updated_at ON chat_sessions;
 CREATE TRIGGER chat_sessions_touch_updated_at
 BEFORE UPDATE ON chat_sessions
+FOR EACH ROW EXECUTE FUNCTION touch_updated_at();
+
+DROP TRIGGER IF EXISTS dashboard_tickets_touch_updated_at ON dashboard_tickets;
+CREATE TRIGGER dashboard_tickets_touch_updated_at
+BEFORE UPDATE ON dashboard_tickets
 FOR EACH ROW EXECUTE FUNCTION touch_updated_at();

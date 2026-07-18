@@ -9,4 +9,4 @@ COPY scripts ./scripts
 
 RUN npm install
 
-EXPOSE 3000 4000 5000
+EXPOSE 3000 5000

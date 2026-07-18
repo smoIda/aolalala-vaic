@@ -78,6 +78,19 @@ class TicketUpdate(BaseModel):
     ticket_type: Optional[str] = None
 
 
+class InternalTicketCreate(BaseModel):
+    """Body nội bộ để chatbot backend tạo ticket trong dashboard."""
+
+    title: str = Field(..., min_length=1)
+    description: str = Field(..., min_length=1)
+    priority: Optional[str] = None
+    ticket_type: Optional[str] = None
+    patient_name: Optional[str] = None
+    patient_phone: Optional[str] = None
+    patient_email: Optional[str] = None
+    metadata: dict = Field(default_factory=dict)
+
+
 class NoteCreate(BaseModel):
     """Body cho POST thêm trao đổi nội bộ."""
 

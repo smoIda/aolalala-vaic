@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from .config import APP_DESCRIPTION, APP_TITLE, APP_VERSION, FRONTEND_DIR
-from .routers import auth, classify, meta, tickets
+from .routers import auth, classify, internal, meta, tickets
 
 
 def create_app() -> FastAPI:
@@ -30,6 +30,7 @@ def create_app() -> FastAPI:
     app.include_router(auth.router)
     app.include_router(tickets.router)
     app.include_router(classify.router)
+    app.include_router(internal.router)
     app.include_router(meta.router)
 
     @app.get("/api/health", tags=["meta"], summary="Kiểm tra API sống")

@@ -1,0 +1,26 @@
+services:
+  dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aolalala-dashboard
+    environment:
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-internal-key}
+      DASHBOARD_DATABASE_URL: ${DASHBOARD_DATABASE_URL:-postgres://chatbot:chatbot@host.docker.internal:15433/chatbot}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health', timeout=3).read()",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

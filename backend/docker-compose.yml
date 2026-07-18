@@ -16,23 +16,6 @@ services:
       timeout: 3s
       retries: 20
 
-  backoffice-postgres:
-    image: postgres:16-alpine
-    environment:
-      POSTGRES_DB: backoffice
-      POSTGRES_USER: backoffice
-      POSTGRES_PASSWORD: backoffice
-    ports:
-      - "15434:5432"
-    volumes:
-      - backoffice-postgres-data:/var/lib/postgresql/data
-      - ./sql/backoffice:/docker-entrypoint-initdb.d:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U backoffice -d backoffice"]
-      interval: 5s
-      timeout: 3s
-      retries: 20
-
   hert-hospital-mcp:
     build:
       context: .
@@ -48,33 +31,18 @@ services:
       chatbot-postgres:
         condition: service_healthy
 
-  backoffice-api:
-    build:
-      context: .
-      dockerfile: docker/node.Dockerfile
-    command: npm run dev:backoffice
-    environment:
-      BACKOFFICE_PORT: 4000
-      BACKOFFICE_DATABASE_URL: postgres://backoffice:backoffice@backoffice-postgres:5432/backoffice
-      BETTER_AUTH_SECRET: replace-with-a-long-random-secret
-      BETTER_AUTH_URL: http://localhost:4000
-      INTERNAL_API_KEY: dev-internal-key
-    ports:
-      - "4000:4000"
-    depends_on:
-      backoffice-postgres:
-        condition: service_healthy
-
   chatbot-api:
     build:
       context: .
       dockerfile: docker/node.Dockerfile
     command: npm run dev:chatbot
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       CHATBOT_PORT: 3000
       CHATBOT_DATABASE_URL: postgres://chatbot:chatbot@chatbot-postgres:5432/chatbot
       MCP_HTTP_URL: http://hert-hospital-mcp:5000
-      BACKOFFICE_API_URL: http://backoffice-api:4000
+      DASHBOARD_API_URL: http://host.docker.internal:8000/api/internal
       INTERNAL_API_KEY: dev-internal-key
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-~openai/gpt-latest}
@@ -91,8 +59,6 @@ services:
         condition: service_healthy
       hert-hospital-mcp:
         condition: service_started
-      backoffice-api:
-        condition: service_started
 
   adminer:
     image: adminer:4
@@ -101,9 +67,6 @@ services:
     depends_on:
       chatbot-postgres:
         condition: service_healthy
-      backoffice-postgres:
-        condition: service_healthy
 
 volumes:
   chatbot-postgres-data:
-  backoffice-postgres-data:

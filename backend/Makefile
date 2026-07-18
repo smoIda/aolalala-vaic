@@ -10,7 +10,7 @@ CF_PORT ?= 3000
 cf:
 	cloudflared tunnel --url http://localhost:$(CF_PORT)
 
-API_SERVICES ?= hert-hospital-mcp backoffice-api chatbot-api
+API_SERVICES ?= hert-hospital-mcp chatbot-api
 
 rebuild-api:
 	docker compose up -d --build $(API_SERVICES)
