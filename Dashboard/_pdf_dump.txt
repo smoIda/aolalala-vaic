@@ -1,0 +1,60 @@
+===== PAGE 1 =====
+Nhóm Event (Trường hợp)Keywords Cần Ticket? Mức ưu tiênPre-action / Action của ChatbotData Form Ticket type (nhãn)
+Thông tin cơ bản
+KH hỏi giá dịch vụ khám/xét nghiệm/thủ thuật giá bao nhiêu chi phí khám/xét nghiệm/siêu âm/x-quang bảng giá dịch vụ khám bệnh hết bao nhiêu tiền
+No - Chatbot tra bảng giá theo tên dịch vụ (search_service_price), trả lời giá Cơ sở 1 và Cơ sở 2
+- -
+KH hỏi quy trình khám bệnh (các bước, thủ tục đăng ký, thứ tự thực hiện)quy trình khám bệnh như thế nào các bước khám đăng ký khám ở đâu sau khi lấy số thì làm gì
+No - Chatbot trả lời theo quy trình 12 bước đã được train (get_reception_process / get_process_step)
+- -
+KH hỏi giải nghĩa từ viết tắt trên giấy tờ khám (BHYT, CLS, XQ, DHST...)là viết tắt của gì nghĩa là gì từ viết tắt
+No - Chatbot tra bảng từ viết tắt đã được train (get_glossary) - -
+KH hỏi thông tin liên hệ, địa chỉ, hotline đặt lịch, giờ đặt lịch qua điện thoạisố điện thoại đặt lịch địa chỉ bệnh viện ở đâu giờ làm việc đặt lịch khám như thế nào
+No - Chatbot trả lời theo thông tin liên hệ đã được train (get_contact_info)- -
+KH hỏi biểu mẫu/phiếu cần chuẩn bị khi đi khám cần mang theo giấy tờ gì phiếu gì cần chuẩn bị gì trước khi khám
+No - Chatbot trả lời theo danh sách biểu mẫu đã được train (get_appendix_forms)- -
+Thông tin cần tra cứu cá nhân/real-time
+KH hỏi lịch khám còn trống của bác sĩ/giáo sư cụ thể vào ngày cụ thểcòn lịch khám không bác sĩ [tên] còn khám ngày mai không còn chỗ trống không
+No - Chatbot trả lời không có dữ liệu lịch trống real-time; điều hướng KH gọi hotline đặt lịch 19001082 hoặc đặt lịch qua kênh online
+- -
+KH hỏi kết quả xét nghiệm/hồ sơ bệnh án cá nhân kết quả xét nghiệm của tôi xem hồ sơ khám bệnh kết quả siêu âm/xq của tôi thế nào
+Yes Cao Chatbot không cung cấp trực tiếp qua chat vì lý do bảo mật thông tin y tế cá nhân; xác nhận thông tin định danh cơ bản rồi tạo ticket
+DF-H05 Hỗ trợ tra cứu hồ sơ/kết quả
+Tư vấn y tế cần chuyên môn
+KH mô tả triệu chứng, hỏi có cần đi khám không/mức độ nghiêm trọngđau ngực khó thở hồi hộp tim đập nhanh có cần đi khám không có nguy hiểm không
+Yes Cao Chatbot KHÔNG tự chẩn đoán hay trấn an; ghi nhận triệu chứng, xác nhận lại với KH trước khi tạo ticket. Nếu phát hiện dấu hiệu cấp cứu rõ ràng → chuyển sang luồng Nhóm "Khẩn cấp", không xử lý ở đây
+DF-H02 Hỗ trợ tư vấn triệu chứng
+KH hỏi tư vấn chăm sóc sau đặt stent/mổ tim/thủ thuật đã thực hiệnsau đặt stent sau mổ tim sau can thiệp chăm sóc như thế nào có kiêng gì không
+Yes Cao Chatbot xác nhận lại thông tin thủ thuật đã khai (loại thủ thuật, thời gian) trước khi tạo ticket
+DF-H03 Hỗ trợ sau can thiệp/phẫu thuật
+KH hỏi về thuốc đang dùng (tương tác thuốc, tác dụng phụ, quên uống thuốc)thuốc này uống chung được không tác dụng phụ của thuốc quên uống thuốc thì sao
+Yes Cao Chatbot không tự tư vấn về thuốc; ghi nhận tên thuốc/liều dùng nếu KH cung cấp, rồi tạo ticket
+DF-H03 Hỗ trợ sau can thiệp/phẫu thuật
+Đặt lịch đặc biệt
+KH yêu cầu đặt lịch gấp/ưu tiênđặt lịch gấp cần khám sớm ưu tiên khám trước
+Yes Thường Chatbot hỏi lý do cần ưu tiên và thời gian mong muốn, sau đó tạo ticketDF-H04 Hỗ trợ đặt lịch đặc biệt
+KH yêu cầu chỉ định khám với bác sĩ/giáo sư cụ thể muốn khám với bác sĩ/giáo sư [tên] chỉ định bác sĩ Yes Thường Chatbot ghi nhận tên bác sĩ/giáo sư mong muốn, tạo ticket DF-H04 Hỗ trợ đặt lịch đặc biệt
+KH yêu cầu đổi/huỷ lịch đã đặtđổi lịch khám huỷ lịch đã đặt không đến khám được
+Yes Thường Chatbot ghi nhận mã đặt lịch/thông tin lịch cũ nếu có, tạo ticket DF-H04 Hỗ trợ đặt lịch đặc biệt
+Chi phí/BHYT ngoài bảng giá chuẩn
+KH hỏi chi phí trường hợp đặc biệt không có trong bảng giágói khám riêng giá bao nhiêu dịch vụ này không thấy trong bảng giá chi phí cho trường hợp của tôi
+Yes Thường Chatbot tra bảng giá trước (search_service_price); nếu không tìm thấy dịch vụ, xác nhận lại tên dịch vụ với KH rồi mới tạo ticket
+DF-H06 Hỗ trợ chi phí/BHYT
+KH hỏi điều kiện hưởng BHYT cho trường hợp cụ thể của mìnhtrường hợp của tôi có được BHYT chi trả không giấy chuyển tuyến của tôi có hợp lệ không BHYT của tôi áp dụng được không
+Yes Thường Chatbot không tự xác nhận quyền lợi BHYT cá nhân; ghi nhận loại thẻ/giấy tờ liên quan, tạo ticket
+DF-H06 Hỗ trợ chi phí/BHYT
+Phàn nàn/khiếu nại
+KH phàn nàn thái độ nhân viên/thời gian chờ phàn nàn thái độ nhân viên chờ lâu quá không hài lòng
+Yes Thường Chatbot ghi nhận mô tả sự việc, thời gian/địa điểm xảy ra, tạo ticketDF-H07 Đánh giá chất lượng dịch vụ
+KH phàn nàn chất lượng khám/dịch vụchất lượng khám không tốt dịch vụ không như mong đợi khiếu nại về bác sĩ
+Yes Thường Chatbot ghi nhận mô tả sự việc, tạo ticketDF-H07 Đánh giá chất lượng dịch vụ
+Sự cố kỹ thuật
+KH báo lỗi web/app không đặt được lịch online không đặt được lịch web bị lỗi app không vào được không thao tác được
+Yes Thường Chatbot hỏi thiết bị/trình duyệt sử dụng và ảnh chụp lỗi nếu có, tạo ticketDF-H08 Hỗ trợ sự cố kỹ thuật
+KH báo không nhận được xác nhận đặt lịch qua tin nhắn/emailkhông nhận được tin nhắn xác nhận không thấy email xác nhận đặt lịchYes Thường Chatbot ghi nhận số điện thoại/email đã đăng ký, tạo ticket DF-H08 Hỗ trợ sự cố kỹ thuật
+Trường hợp khẩn cấp y tế
+KH mô tả dấu hiệu cấp cứu rõ ràng (đau ngực dữ dội, khó thở cấp, ngất, yếu liệt đột ngột...)
+đau ngực dữ dội khó thở cấp ngất xỉu yếu liệt tay chân đột ngột tê liệt nửa người
+Không — cảnh báo khẩn cấpKhẩn Chatbot KHÔNG tạo ticket; hiển thị ngay cảnh báo gọi cấp cứu 115 hoặc đến cơ sở y tế gần nhất; không giữ KH lại để hỏi thêm thông tin
+- Cảnh báo khẩn cấp (không phải ticket)
+Khác Câu hỏi chatbot không đủ dữ liệu phản hồi(không khớp với bất kỳ keyword/case nào ở trên) Yes Thường Chatbot tóm tắt lại câu hỏi, tạo ticketDF-H01 Hỗ trợ vấn đề khác

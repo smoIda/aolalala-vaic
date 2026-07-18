@@ -1,0 +1,252 @@
+{
+  "data_forms": {
+    "DF-H01": "Hỗ trợ vấn đề khác",
+    "DF-H02": "Hỗ trợ tư vấn triệu chứng",
+    "DF-H03": "Hỗ trợ sau can thiệp/phẫu thuật",
+    "DF-H04": "Hỗ trợ đặt lịch đặc biệt",
+    "DF-H05": "Hỗ trợ tra cứu hồ sơ/kết quả",
+    "DF-H06": "Hỗ trợ chi phí/BHYT",
+    "DF-H07": "Đánh giá chất lượng dịch vụ",
+    "DF-H08": "Hỗ trợ sự cố kỹ thuật"
+  },
+  "rules": [
+    {
+      "group": "Trường hợp khẩn cấp y tế",
+      "ticket_type": "Khẩn cấp",
+      "need_ticket": false,
+      "priority": "khan",
+      "data_form": null,
+      "is_emergency": true,
+      "chatbot_action": "Chatbot KHÔNG tạo ticket; hiển thị ngay cảnh báo gọi cấp cứu 115 hoặc đến cơ sở y tế gần nhất; không giữ khách lại để hỏi thêm thông tin.",
+      "keywords": [
+        "đau ngực dữ dội",
+        "khó thở cấp",
+        "ngất xỉu",
+        "ngất",
+        "yếu liệt tay chân đột ngột",
+        "yếu liệt đột ngột",
+        "liệt đột ngột",
+        "tê liệt nửa người",
+        "tê liệt",
+        "co giật"
+      ]
+    },
+    {
+      "group": "Tư vấn y tế cần chuyên môn",
+      "ticket_type": "Tư vấn y tế chuyên môn",
+      "need_ticket": true,
+      "priority": "cao",
+      "data_form": "DF-H03",
+      "is_emergency": false,
+      "chatbot_action": "Chatbot không tự tư vấn về thuốc; ghi nhận tên thuốc/liều dùng nếu khách cung cấp, rồi tạo ticket.",
+      "keywords": [
+        "uống chung được không",
+        "tương tác thuốc",
+        "tác dụng phụ của thuốc",
+        "tác dụng phụ",
+        "quên uống thuốc",
+        "warfarin",
+        "thuốc này uống"
+      ]
+    },
+    {
+      "group": "Tư vấn y tế cần chuyên môn",
+      "ticket_type": "Tư vấn y tế chuyên môn",
+      "need_ticket": true,
+      "priority": "cao",
+      "data_form": "DF-H03",
+      "is_emergency": false,
+      "chatbot_action": "Chatbot xác nhận lại thông tin thủ thuật đã khai (loại thủ thuật, thời gian) trước khi tạo ticket.",
+      "keywords": [
+        "sau đặt stent",
+        "sau mổ tim",
+        "sau can thiệp",
+        "sau phẫu thuật",
+        "chăm sóc sau",
+        "có kiêng gì không",
+        "kiêng gì"
+      ]
+    },
+    {
+      "group": "Tư vấn y tế cần chuyên môn",
+      "ticket_type": "Tư vấn y tế chuyên môn",
+      "need_ticket": true,
+      "priority": "cao",
+      "data_form": "DF-H02",
+      "is_emergency": false,
+      "chatbot_action": "Chatbot KHÔNG tự chẩn đoán hay trấn an; ghi nhận triệu chứng, xác nhận lại với khách trước khi tạo ticket. Nếu phát hiện dấu hiệu cấp cứu rõ ràng chuyển sang luồng khẩn cấp.",
+      "keywords": [
+        "đau ngực",
+        "khó thở",
+        "hồi hộp",
+        "tim đập nhanh",
+        "rối loạn nhịp tim",
+        "có cần đi khám không",
+        "có nguy hiểm không",
+        "triệu chứng"
+      ]
+    },
+    {
+      "group": "Thông tin cần tra cứu cá nhân/real-time",
+      "ticket_type": "Thông tin tra cứu cá nhân",
+      "need_ticket": true,
+      "priority": "cao",
+      "data_form": "DF-H05",
+      "is_emergency": false,
+      "chatbot_action": "Chatbot không cung cấp trực tiếp qua chat vì lý do bảo mật thông tin y tế cá nhân; xác nhận thông tin định danh cơ bản rồi tạo ticket.",
+      "keywords": [
+        "kết quả xét nghiệm của tôi",
+        "kết quả xét nghiệm",
+        "xem hồ sơ khám bệnh",
+        "hồ sơ bệnh án",
+        "kết quả siêu âm của tôi",
+        "kết quả siêu âm",
+        "tra cứu kết quả",
+        "kết quả của tôi"
+      ]
+    },
+    {
+      "group": "Thông tin cần tra cứu cá nhân/real-time",
+      "ticket_type": "Thông tin tra cứu cá nhân",
+      "need_ticket": false,
+      "priority": null,
+      "data_form": null,
+      "is_emergency": false,
+      "chatbot_action": "Chatbot trả lời không có dữ liệu lịch trống real-time; điều hướng khách gọi hotline đặt lịch 19001082 hoặc đặt lịch qua kênh online.",
+      "keywords": [
+        "còn lịch khám không",
+        "còn khám ngày mai không",
+        "còn chỗ trống không",
+        "còn lịch trống",
+        "lịch trống"
+      ]
+    },
+    {
+      "group": "Đặt lịch đặc biệt",
+      "ticket_type": "Đặt lịch khám đặc biệt",
+      "need_ticket": true,
+      "priority": "thuong",
+      "data_form": "DF-H04",
+      "is_emergency": false,
+      "chatbot_action": "Chatbot ghi nhận yêu cầu đặt lịch đặc biệt (lý do ưu tiên, bác sĩ mong muốn hoặc mã lịch cũ), sau đó tạo ticket.",
+      "keywords": [
+        "đặt lịch gấp",
+        "cần khám sớm",
+        "ưu tiên khám trước",
+        "khám với bác sĩ",
+        "khám với giáo sư",
+        "chỉ định bác sĩ",
+        "đổi lịch khám",
+        "huỷ lịch",
+        "hủy lịch",
+        "không đến khám được",
+        "đặt lịch khám chuyên sâu",
+        "đặt lịch khám"
+      ]
+    },
+    {
+      "group": "Chi phí/BHYT ngoài bảng giá chuẩn",
+      "ticket_type": "Chi phí BHYT ngoài bảng giá chuẩn",
+      "need_ticket": true,
+      "priority": "thuong",
+      "data_form": "DF-H06",
+      "is_emergency": false,
+      "chatbot_action": "Chatbot tra bảng giá trước; nếu không tìm thấy dịch vụ hoặc là quyền lợi BHYT cá nhân, xác nhận lại thông tin rồi tạo ticket.",
+      "keywords": [
+        "gói khám riêng",
+        "không thấy trong bảng giá",
+        "không nằm trong bảng giá",
+        "chi phí cho trường hợp của tôi",
+        "có được bhyt chi trả không",
+        "bhyt chi trả",
+        "giấy chuyển tuyến",
+        "bhyt của tôi",
+        "danh mục bhyt",
+        "doppler màu có nằm trong danh mục"
+      ]
+    },
+    {
+      "group": "Phàn nàn/khiếu nại",
+      "ticket_type": "Phàn nàn / Khiếu nại",
+      "need_ticket": true,
+      "priority": "thuong",
+      "data_form": "DF-H07",
+      "is_emergency": false,
+      "chatbot_action": "Chatbot ghi nhận mô tả sự việc, thời gian/địa điểm xảy ra, tạo ticket.",
+      "keywords": [
+        "phàn nàn",
+        "thái độ nhân viên",
+        "thái độ phục vụ",
+        "chờ lâu",
+        "không hài lòng",
+        "chất lượng khám không tốt",
+        "dịch vụ không như mong đợi",
+        "khiếu nại",
+        "phản ánh"
+      ]
+    },
+    {
+      "group": "Sự cố kỹ thuật",
+      "ticket_type": "Sự cố kỹ thuật",
+      "need_ticket": true,
+      "priority": "thuong",
+      "data_form": "DF-H08",
+      "is_emergency": false,
+      "chatbot_action": "Chatbot hỏi thiết bị/trình duyệt sử dụng và ảnh chụp lỗi (hoặc SĐT/email đã đăng ký) nếu có, rồi tạo ticket.",
+      "keywords": [
+        "không đặt được lịch",
+        "web bị lỗi",
+        "app không vào được",
+        "không thao tác được",
+        "chatbot báo lỗi",
+        "không thể kết nối",
+        "không nhận được tin nhắn xác nhận",
+        "không thấy email xác nhận",
+        "lỗi hệ thống",
+        "bị lỗi"
+      ]
+    },
+    {
+      "group": "Thông tin cơ bản",
+      "ticket_type": "Thông tin cơ bản",
+      "need_ticket": false,
+      "priority": null,
+      "data_form": null,
+      "is_emergency": false,
+      "chatbot_action": "Chatbot trả lời trực tiếp theo dữ liệu đã được train (bảng giá, quy trình 12 bước, từ viết tắt, thông tin liên hệ, danh sách biểu mẫu).",
+      "keywords": [
+        "giá bao nhiêu",
+        "giá khám",
+        "khám bao nhiêu",
+        "bao nhiêu tiền",
+        "chi phí khám",
+        "bảng giá",
+        "hết bao nhiêu tiền",
+        "giá dịch vụ",
+        "quy trình khám",
+        "các bước khám",
+        "đăng ký khám ở đâu",
+        "lấy số thì làm gì",
+        "viết tắt của gì",
+        "nghĩa là gì",
+        "từ viết tắt",
+        "số điện thoại đặt lịch",
+        "địa chỉ bệnh viện",
+        "giờ làm việc",
+        "cần mang theo giấy tờ gì",
+        "cần chuẩn bị gì",
+        "quy trình tái khám",
+        "tái khám định kỳ"
+      ]
+    }
+  ],
+  "fallback": {
+    "group": "Khác",
+    "ticket_type": "Khác",
+    "need_ticket": true,
+    "priority": "thuong",
+    "data_form": "DF-H01",
+    "is_emergency": false,
+    "chatbot_action": "Câu hỏi không khớp với bất kỳ nhóm nào; chatbot tóm tắt lại câu hỏi và tạo ticket hỗ trợ vấn đề khác."
+  }
+}

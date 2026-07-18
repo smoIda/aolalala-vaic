@@ -1,0 +1,73 @@
+/* =====================================================================
+   Design tokens - đổi theme tại đây là đủ.
+   ===================================================================== */
+:root {
+  /* Màu nền & bề mặt */
+  --color-bg: #eef2f7;
+  --color-surface: #ffffff;
+  --color-surface-2: #f8fafc;
+  --color-header: #ffffff;
+
+  /* Chữ */
+  --color-text: #1e293b;
+  --color-text-strong: #0f172a;
+  --color-text-muted: #64748b;
+  --color-text-subtle: #94a3b8;
+
+  /* Viền & đường kẻ */
+  --color-border: #e2e8f0;
+  --color-border-strong: #cbd5e1;
+
+  /* Nhấn (accent) - xanh navy */
+  --color-primary: #3d6889;
+  --color-primary-strong: #2f4f6c;
+  --color-primary-soft: #e1e9ef;
+
+  /* Trạng thái */
+  --color-pending: #f59e0b;          /* cam */
+  --color-pending-text: #b45309;
+  --color-pending-soft: #fef3c7;
+  --color-done: #22c55e;             /* xanh lá */
+  --color-done-text: #15803d;
+  --color-done-soft: #dcfce7;
+
+  /* Mức ưu tiên */
+  --color-cao: #dc2626;
+  --color-cao-soft: #fee2e2;
+  --color-thuong: #2563eb;
+  --color-thuong-soft: #dbeafe;
+  --color-khan: #b91c1c;
+  --color-khan-soft: #fecaca;
+
+  /* Thẻ thống kê */
+  --color-stat-total: #475569;
+  --color-stat-total-soft: #e2e8f0;
+  --color-stat-pending: #d97706;
+  --color-stat-pending-soft: #fef3c7;
+  --color-stat-done: #16a34a;
+  --color-stat-done-soft: #dcfce7;
+
+  /* Bo góc */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-pill: 999px;
+
+  /* Bóng đổ */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 16px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 12px 40px rgba(15, 23, 42, 0.18);
+
+  /* Khoảng cách */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Bố cục */
+  --container-max: 1680px;
+  --font-sans: "Segoe UI", Roboto, "Helvetica Neue", Arial, system-ui, sans-serif;
+}

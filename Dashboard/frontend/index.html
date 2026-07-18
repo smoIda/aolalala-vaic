@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hệ thống quản trị Ticket chatbot - BV Tim Mạch Hà Nội</title>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+</head>
+<body>
+  <!-- ================= VIEW: Đăng nhập / Đăng ký ================= -->
+  <div id="view-auth" class="auth-page" hidden></div>
+
+  <!-- ================= APP SHELL (chỉ hiện sau khi đăng nhập) ================= -->
+  <div id="app-shell" hidden>
+    <!-- ================= HEADER ================= -->
+    <header class="app-header">
+      <div class="app-header__inner">
+        <div class="brand">
+          <div class="brand__text">
+            <h1 class="brand__title">Bệnh viện Tim Mạch Hà Nội</h1>
+            <p class="brand__subtitle">Hệ thống quản trị Ticket chatbot</p>
+          </div>
+        </div>
+
+        <div class="header-actions">
+          <span class="context-pill" id="context-pill" hidden>
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 11l3 3L22 4"/>
+              <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+            </svg>
+            <span>Chi tiết Ticket</span>
+          </span>
+
+          <div class="notif-wrap">
+            <button class="icon-btn" id="btn-notify" aria-label="Thông báo" title="Thông báo">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.7 21a2 2 0 0 1-3.4 0"/>
+              </svg>
+              <span class="icon-btn__dot" id="notif-dot" aria-hidden="true" hidden></span>
+            </button>
+
+            <div class="notif-panel" id="notif-panel" hidden>
+              <div class="notif-panel__head">Thông báo mới</div>
+              <div class="notif-panel__list" id="notif-list"></div>
+            </div>
+          </div>
+
+          <div class="profile-wrap">
+            <button class="profile" id="profile-btn" type="button">
+              <span class="profile__avatar" id="profile-avatar">A</span>
+              <span class="profile__meta">
+                <span class="profile__name" id="profile-name">Admin</span>
+                <span class="profile__role" id="profile-role">Quản trị viên</span>
+              </span>
+            </button>
+            <div class="profile-menu" id="profile-menu" hidden>
+              <span class="profile-menu__email" id="profile-menu-email"></span>
+              <button class="profile-menu__logout" id="btn-logout" type="button">Đăng xuất</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ================= TAB BAR ================= -->
+    <nav class="tab-bar">
+      <div class="tab-bar__inner">
+        <button class="tab tab--active" type="button">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+          </svg>
+          <span>Danh sách Ticket</span>
+          <span class="tab__badge" id="tab-count">0</span>
+        </button>
+      </div>
+    </nav>
+
+    <!-- ================= MAIN ================= -->
+    <main class="container">
+      <!-- ========= VIEW: Danh sách ========= -->
+      <section id="view-list">
+        <!-- Thẻ thống kê -->
+        <section class="stats" id="stats" aria-label="Thống kê ticket"></section>
+
+        <!-- Thanh công cụ: tìm kiếm + bộ lọc -->
+        <section class="toolbar">
+          <div class="search">
+            <svg class="search__icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="7"/>
+              <path d="M21 21l-4.3-4.3"/>
+            </svg>
+            <input type="text" id="search-input" class="search__input"
+                   placeholder="Tìm theo ID Ticket hoặc nội dung câu hỏi..." autocomplete="off" />
+          </div>
+
+          <div class="filters">
+            <select id="filter-type" class="select" aria-label="Lọc theo loại ticket">
+              <option value="">Tất cả loại Ticket</option>
+            </select>
+            <select id="filter-status" class="select" aria-label="Lọc theo trạng thái">
+              <option value="">Tất cả trạng thái</option>
+              <option value="pending">Chưa hoàn thành</option>
+              <option value="completed">Đã hoàn thành</option>
+            </select>
+            <select id="filter-sort" class="select" aria-label="Sắp xếp">
+              <option value="newest">Mới nhất → Cũ nhất</option>
+              <option value="oldest">Cũ nhất → Mới nhất</option>
+            </select>
+          </div>
+        </section>
+
+        <!-- Bảng ticket -->
+        <section class="table-card">
+          <div class="table-scroll">
+            <table class="ticket-table">
+              <thead>
+                <tr>
+                  <th>ID Ticket</th>
+                  <th>Câu hỏi chuyên môn</th>
+                  <th>Loại Ticket</th>
+                  <th>Trạng thái</th>
+                  <th>Ngày tạo</th>
+                  <th>Người gửi</th>
+                </tr>
+              </thead>
+              <tbody id="ticket-tbody"><!-- render bằng JS --></tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <span class="table-footer__count" id="footer-count">Hiển thị 0 / 0 Ticket</span>
+            <div class="pagination" id="pagination"><!-- render bằng JS --></div>
+          </div>
+        </section>
+      </section>
+
+      <!-- ========= VIEW: Chi tiết Ticket (full màn hình) ========= -->
+      <section id="view-detail" hidden>
+        <nav class="breadcrumb" aria-label="breadcrumb">
+          <button class="breadcrumb__back" id="breadcrumb-back" type="button">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M19 12H5"/>
+              <path d="M12 19l-7-7 7-7"/>
+            </svg>
+            <span>Danh sách Ticket</span>
+          </button>
+          <span class="breadcrumb__sep">/</span>
+          <span class="breadcrumb__current" id="breadcrumb-current"></span>
+        </nav>
+
+        <div class="detail-page">
+          <div class="detail-main" id="detail-main"><!-- render bằng JS --></div>
+          <aside class="detail-side" id="detail-side"><!-- render bằng JS --></aside>
+        </div>
+      </section>
+    </main>
+
+    <!-- Nút trợ giúp nổi -->
+    <button class="help-fab" id="help-fab" aria-label="Trợ giúp" title="Trợ giúp">?</button>
+  </div>
+
+  <!-- SDK đăng nhập mạng xã hội (chỉ thực sự kích hoạt khi đã cấu hình Client ID/App ID trong js/config.js) -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script id="fb-sdk" src="https://connect.facebook.net/vi_VN/sdk.js" async defer></script>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

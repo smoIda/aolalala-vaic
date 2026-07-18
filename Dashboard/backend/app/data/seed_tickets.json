@@ -1,0 +1,150 @@
+[
+  {
+    "id": "TK-2024001",
+    "question": "Tôi bị đau ngực kéo dài 3 ngày, có cần nhập viện cấp cứu không?",
+    "full_question": "Tôi bị đau ngực kéo dài 3 ngày, có cần nhập viện cấp cứu không? Cơn đau lan ra vai trái.",
+    "ticket_type": "Tư vấn y tế chuyên môn",
+    "status": "pending",
+    "priority": "cao",
+    "data_form_code": "DF-H02",
+    "data_form_name": "Hỗ trợ tư vấn triệu chứng",
+    "created_at": "2024-07-17T09:32",
+    "sender": { "name": "Nguyễn Văn Minh", "email": "nguyenvanminh@gmail.com", "phone": "0912 345 678" },
+    "assignee": { "name": "BS. Trần Thị Lan", "role": "Bác sĩ Tim mạch", "email": "lan.tran@bvtimhanoi.vn", "phone": "024 3825 3025" },
+    "notes": [
+      {
+        "author": "BS. Trần Thị Lan",
+        "role": "Bác sĩ Tim mạch",
+        "content": "Đã liên hệ bệnh nhân qua điện thoại. Khuyến nghị đến khám ngay hôm nay.",
+        "created_at": "2024-07-17T10:15"
+      }
+    ],
+    "suggested_action": "Chatbot ghi nhận triệu chứng, xác nhận lại với khách trước khi tạo ticket. Nếu có dấu hiệu cấp cứu rõ ràng thì chuyển sang luồng khẩn cấp."
+  },
+  {
+    "id": "TK-2024002",
+    "question": "Tôi muốn tra cứu kết quả xét nghiệm tim mạch ngày 14/07 của tôi.",
+    "full_question": "Tôi đã làm xét nghiệm tim mạch tại cơ sở 1 vào ngày 14/07 vừa rồi. Cho tôi hỏi làm cách nào để tra cứu và xem lại kết quả xét nghiệm của mình?",
+    "ticket_type": "Thông tin tra cứu cá nhân",
+    "status": "completed",
+    "priority": "cao",
+    "data_form_code": "DF-H05",
+    "data_form_name": "Hỗ trợ tra cứu hồ sơ/kết quả",
+    "created_at": "2024-07-16T14:20",
+    "sender": { "name": "Lê Thị Hương", "email": "lethuong.hm@yahoo.com", "phone": "0977 234 567" },
+    "assignee": { "name": "CN. Đỗ Thị Hằng", "role": "Nhân viên CSKH", "email": "hang.do@bvtimhanoi.vn", "phone": "024 3825 3026" },
+    "notes": [
+      {
+        "author": "CN. Đỗ Thị Hằng",
+        "role": "Nhân viên CSKH",
+        "content": "Đã xác minh thông tin định danh và gửi kết quả xét nghiệm qua email đã đăng ký.",
+        "created_at": "2024-07-16T15:05"
+      }
+    ],
+    "suggested_action": "Chatbot không cung cấp kết quả trực tiếp qua chat vì lý do bảo mật; xác nhận thông tin định danh cơ bản rồi tạo ticket."
+  },
+  {
+    "id": "TK-2024003",
+    "question": "Quy trình đặt lịch khám chuyên sâu cho bệnh nhân suy tim nặng như thế nào?",
+    "full_question": "Người nhà tôi bị suy tim nặng, cần được khám chuyên sâu với bác sĩ chuyên khoa. Cho tôi hỏi quy trình đặt lịch khám chuyên sâu cho trường hợp này như thế nào và có được ưu tiên không?",
+    "ticket_type": "Đặt lịch khám đặc biệt",
+    "status": "pending",
+    "priority": "thuong",
+    "data_form_code": "DF-H04",
+    "data_form_name": "Hỗ trợ đặt lịch đặc biệt",
+    "created_at": "2024-07-16T11:05",
+    "sender": { "name": "Trần Quốc Bảo", "email": "tranquocbao@outlook.com", "phone": "0909 111 222" },
+    "assignee": { "name": "NV. Phạm Văn Đức", "role": "Nhân viên Lễ tân", "email": "duc.pham@bvtimhanoi.vn", "phone": "024 3825 3027" },
+    "notes": [
+      {
+        "author": "NV. Phạm Văn Đức",
+        "role": "Nhân viên Lễ tân",
+        "content": "Đang liên hệ khoa Nội tim mạch để xác nhận lịch ưu tiên cho bệnh nhân.",
+        "created_at": "2024-07-16T11:40"
+      }
+    ],
+    "suggested_action": "Chatbot hỏi lý do cần ưu tiên và thời gian mong muốn, sau đó tạo ticket."
+  },
+  {
+    "id": "TK-2024004",
+    "question": "Chi phí siêu âm tim doppler màu có nằm trong danh mục BHYT chi trả không?",
+    "full_question": "Tôi được chỉ định siêu âm tim doppler màu. Cho tôi hỏi chi phí dịch vụ này là bao nhiêu và có nằm trong danh mục được BHYT chi trả không? Thẻ BHYT của tôi có áp dụng được không?",
+    "ticket_type": "Chi phí BHYT ngoài bảng giá chuẩn",
+    "status": "pending",
+    "priority": "thuong",
+    "data_form_code": "DF-H06",
+    "data_form_name": "Hỗ trợ chi phí/BHYT",
+    "created_at": "2024-07-15T08:47",
+    "sender": { "name": "Phạm Thị Ngọc", "email": "phamngoc1975@gmail.com", "phone": "0988 333 444" },
+    "assignee": { "name": "CN. Nguyễn Thị Thu", "role": "Nhân viên Tài chính - Kế toán", "email": "thu.nguyen@bvtimhanoi.vn", "phone": "024 3825 3028" },
+    "notes": [],
+    "suggested_action": "Chatbot tra bảng giá trước; nếu là quyền lợi BHYT cá nhân thì ghi nhận loại thẻ/giấy tờ liên quan rồi tạo ticket."
+  },
+  {
+    "id": "TK-2024005",
+    "question": "Chatbot báo lỗi không thể kết nối khi tôi cố gắng đặt lịch khám online.",
+    "full_question": "Khi tôi cố gắng đặt lịch khám online qua website, chatbot liên tục báo lỗi \"không thể kết nối\" và tôi không hoàn tất được thao tác đặt lịch. Nhờ bộ phận kỹ thuật kiểm tra giúp.",
+    "ticket_type": "Sự cố kỹ thuật",
+    "status": "completed",
+    "priority": "thuong",
+    "data_form_code": "DF-H08",
+    "data_form_name": "Hỗ trợ sự cố kỹ thuật",
+    "created_at": "2024-07-15T16:12",
+    "sender": { "name": "Đinh Văn Hùng", "email": "dinhvanhung.qn@gmail.com", "phone": "0912 555 666" },
+    "assignee": { "name": "KS. Vũ Minh Khôi", "role": "Kỹ thuật viên CNTT", "email": "khoi.vu@bvtimhanoi.vn", "phone": "024 3825 3029" },
+    "notes": [
+      {
+        "author": "KS. Vũ Minh Khôi",
+        "role": "Kỹ thuật viên CNTT",
+        "content": "Đã kiểm tra và khắc phục lỗi kết nối máy chủ đặt lịch. Đã xác nhận lại với khách hàng.",
+        "created_at": "2024-07-15T16:40"
+      }
+    ],
+    "suggested_action": "Chatbot hỏi thiết bị/trình duyệt sử dụng và ảnh chụp lỗi nếu có, tạo ticket."
+  },
+  {
+    "id": "TK-2024006",
+    "question": "Tôi bị rối loạn nhịp tim và đang dùng thuốc Warfarin, có tương tác gì không?",
+    "full_question": "Tôi được chẩn đoán rối loạn nhịp tim và hiện đang dùng thuốc Warfarin theo đơn. Gần đây tôi muốn uống thêm một số thuốc bổ, cho tôi hỏi có tương tác gì nguy hiểm không và cần lưu ý gì?",
+    "ticket_type": "Tư vấn y tế chuyên môn",
+    "status": "pending",
+    "priority": "cao",
+    "data_form_code": "DF-H03",
+    "data_form_name": "Hỗ trợ sau can thiệp/phẫu thuật",
+    "created_at": "2024-07-14T13:25",
+    "sender": { "name": "Hoàng Thị Mai", "email": "hoangmai.hn@gmail.com", "phone": "0933 777 888" },
+    "assignee": { "name": "BS. Nguyễn Văn Tùng", "role": "Bác sĩ Tim mạch", "email": "tung.nguyen@bvtimhanoi.vn", "phone": "024 3825 3025" },
+    "notes": [],
+    "suggested_action": "Chatbot không tự tư vấn về thuốc; ghi nhận tên thuốc/liều dùng nếu khách cung cấp, rồi tạo ticket."
+  },
+  {
+    "id": "TK-2024007",
+    "question": "Phản ánh về thái độ phục vụ không đúng mực tại quầy tiếp đón sáng nay.",
+    "full_question": "Tôi muốn phản ánh về thái độ phục vụ thiếu niềm nở, không đúng mực của nhân viên tại quầy tiếp đón vào sáng nay khoảng 8h30. Mong bệnh viện xem xét và chấn chỉnh.",
+    "ticket_type": "Phàn nàn / Khiếu nại",
+    "status": "pending",
+    "priority": "thuong",
+    "data_form_code": "DF-H07",
+    "data_form_name": "Đánh giá chất lượng dịch vụ",
+    "created_at": "2024-07-13T09:10",
+    "sender": { "name": "Vũ Minh Tuấn", "email": "vuminhtuanhn@gmail.com", "phone": "0944 888 999" },
+    "assignee": { "name": "CN. Lê Văn Sơn", "role": "Trưởng phòng CSKH", "email": "son.le@bvtimhanoi.vn", "phone": "024 3825 3030" },
+    "notes": [],
+    "suggested_action": "Chatbot ghi nhận mô tả sự việc, thời gian/địa điểm xảy ra, tạo ticket."
+  },
+  {
+    "id": "TK-2024008",
+    "question": "Thông tin cơ bản về quy trình tái khám định kỳ cho bệnh nhân sau đặt stent.",
+    "full_question": "Cho tôi hỏi thông tin cơ bản về quy trình tái khám định kỳ dành cho bệnh nhân sau đặt stent mạch vành: bao lâu tái khám một lần, cần chuẩn bị giấy tờ gì?",
+    "ticket_type": "Thông tin cơ bản",
+    "status": "completed",
+    "priority": null,
+    "data_form_code": null,
+    "data_form_name": null,
+    "created_at": "2024-07-12T10:00",
+    "sender": { "name": "Ngô Thị Bình", "email": "ngobinh.tp@gmail.com", "phone": "0966 123 789" },
+    "assignee": { "name": "CN. Đỗ Thị Hằng", "role": "Nhân viên CSKH", "email": "hang.do@bvtimhanoi.vn", "phone": "024 3825 3026" },
+    "notes": [],
+    "suggested_action": "Chatbot trả lời trực tiếp theo quy trình đã được train, không cần tạo ticket."
+  }
+]
