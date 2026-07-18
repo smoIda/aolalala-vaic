@@ -31,6 +31,12 @@ const chatSchema = z.object({
 
 const app = Fastify({ logger: true });
 
+const sttServiceUrl = process.env.SONIOX_SERVICE_URL ?? "http://localhost:8001";
+
+app.addContentTypeParser("*", { parseAs: "buffer" }, (_request, payload, done) => {
+  done(null, payload);
+});
+
 app.addHook("onRequest", async (request, reply) => {
   reply.header("Access-Control-Allow-Origin", "*");
   reply.header("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
@@ -47,6 +53,38 @@ app.addHook("onRequest", async (request, reply) => {
 app.get("/health", async () => {
   await pool.query("SELECT 1");
   return { ok: true, service: "chatbot-api" };
+});
+
+app.post("/voice", async (request, reply) => {
+  const audio = request.body;
+  if (!Buffer.isBuffer(audio) || audio.length === 0) {
+    return reply.status(400).send({
+      error: "empty_audio",
+      message: "No audio data received.",
+    });
+  }
+
+  let sttResponse: Response;
+  try {
+    sttResponse = await fetch(`${sttServiceUrl}/voice`, {
+      method: "POST",
+      headers: { "Content-Type": request.headers["content-type"] ?? "application/octet-stream" },
+      body: new Uint8Array(audio),
+    });
+  } catch (error) {
+    app.log.error(error);
+    return reply.status(502).send({
+      error: "stt_unreachable",
+      message: "Speech-to-text service is unavailable.",
+    });
+  }
+
+  const data = await sttResponse.json();
+  if (!sttResponse.ok) {
+    return reply.status(502).send(data);
+  }
+
+  return reply.send(data);
 });
 
 app.post("/chat", async (request, reply) => {

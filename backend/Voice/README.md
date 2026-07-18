@@ -19,6 +19,26 @@ Luồng tổng thể:
 
 ---
 
+## 0. Đã có sẵn: HTTP service cho nút mic trên chatbot
+
+`server.py` bọc sẵn `SonioxSTT.transcribe_audio_bytes` thành một endpoint HTTP
+(`POST /voice`, nhận raw audio bytes, trả `{"transcript": "..."}"`). Backend
+Node/Fastify (`apps/chatbot-api`) có route `POST /voice` proxy sang service
+này (biến môi trường `SONIOX_SERVICE_URL`, mặc định `http://localhost:8001`).
+Nút mic trên chatbot ở frontend gọi `${API_URL}/voice` (qua backend chính),
+backend chính forward sang service này.
+
+Chạy service (cần Python + pip riêng, không nằm trong `npm run dev:chatbot`):
+
+```bash
+cd backend/Voice
+pip install -r requirements.txt
+export SONIOX_API_KEY=<key>      # Windows: setx SONIOX_API_KEY "<key>"
+python server.py                  # lắng nghe :8001 (đổi bằng SONIOX_SERVICE_PORT)
+```
+
+---
+
 ## 1. Cài đặt
 
 ```bash

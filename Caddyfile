@@ -1,0 +1,30 @@
+# Caddy reverse proxy for the whole stack (one public entrypoint, auto HTTPS).
+#
+# SITE_ADDRESS comes from the environment (.env.vps):
+#   - A hostname (e.g. 1-2-3-4.sslip.io or myapp.duckdns.org) → Caddy auto-obtains
+#     a Let's Encrypt certificate and serves HTTPS on :443.
+#   - ":80" → plain HTTP only (fallback if you have no DNS name yet).
+#
+# Routing:
+#   /api/*  → chatbot-api (the /api prefix is stripped, so /api/chat → /chat)
+#   /*      → Next.js frontend
+
+{$SITE_ADDRESS} {
+	encode gzip
+
+	# Backend API. handle_path strips the /api prefix before proxying.
+	# Voice transcription can take ~15s, so widen the upstream timeouts.
+	handle_path /api/* {
+		reverse_proxy chatbot-api:3000 {
+			transport http {
+				read_timeout 120s
+				write_timeout 120s
+			}
+		}
+	}
+
+	# Everything else → frontend (Next.js standalone server on :3000)
+	handle {
+		reverse_proxy frontend:3000
+	}
+}

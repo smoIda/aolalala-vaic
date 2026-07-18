@@ -1,0 +1,148 @@
+# Full-stack deployment for a single VPS (Oracle Cloud Free Tier, arm64/amd64).
+#
+# One public entrypoint (Caddy) terminates HTTPS and routes:
+#   https://<domain>/      → frontend (Next.js)
+#   https://<domain>/api/* → chatbot-api (Fastify)  [/api prefix stripped]
+#
+# Everything else (Postgres, MCP, Soniox STT) stays on the private network and
+# is never published to the host.
+#
+# Usage:
+#   cp .env.vps.example .env
+#   # edit .env (SONIOX_API_KEY, CHATBOT_DB_PASSWORD, SITE_ADDRESS, ...)
+#   docker compose -f docker-compose.vps.yml up -d --build
+#   docker compose -f docker-compose.vps.yml --profile setup run --rm import-data
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?required}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - frontend
+      - chatbot-api
+    networks:
+      - appnet
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        # Same-origin: the browser calls /api/* which Caddy routes to the
+        # backend. Relative path means no rebuild when the IP/domain changes.
+        NEXT_PUBLIC_API_URL: ${PUBLIC_API_URL:-/api}
+    restart: unless-stopped
+    networks:
+      - appnet
+
+  chatbot-api:
+    build:
+      context: ./backend
+      dockerfile: docker/production.Dockerfile
+    command: npx tsx apps/chatbot-api/src/server.ts
+    restart: unless-stopped
+    environment:
+      CHATBOT_PORT: 3000
+      CHATBOT_DATABASE_URL: postgres://${CHATBOT_DB_USER:-chatbot}:${CHATBOT_DB_PASSWORD}@chatbot-postgres:5432/${CHATBOT_DB_NAME:-chatbot}
+      MCP_HTTP_URL: http://hert-hospital-mcp:5000
+      SONIOX_SERVICE_URL: http://soniox-stt:8001
+      DASHBOARD_API_URL: ${DASHBOARD_API_URL:-http://localhost:8000/api/internal}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-internal-key}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-~openai/gpt-latest}
+      OPENROUTER_HTTP_REFERER: ${OPENROUTER_HTTP_REFERER:-http://localhost}
+      OPENROUTER_APP_TITLE: ${OPENROUTER_APP_TITLE:-Hert Hospital Chatbot}
+      AI_PROVIDER_LOG_ENABLED: ${AI_PROVIDER_LOG_ENABLED:-false}
+      AI_PROVIDER_LOG_FILE: /app/logs/ai-provider.log
+    volumes:
+      - ai-logs:/app/logs
+    depends_on:
+      chatbot-postgres:
+        condition: service_healthy
+      hert-hospital-mcp:
+        condition: service_started
+      soniox-stt:
+        condition: service_started
+    networks:
+      - appnet
+
+  soniox-stt:
+    build:
+      context: ./backend/Voice
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      SONIOX_API_KEY: ${SONIOX_API_KEY:?required}
+    networks:
+      - appnet
+
+  hert-hospital-mcp:
+    build:
+      context: ./backend
+      dockerfile: docker/production.Dockerfile
+    command: npx tsx packages/hert-hospital-mcp/src/server.ts
+    restart: unless-stopped
+    environment:
+      MCP_TRANSPORT: http
+      MCP_HTTP_PORT: 5000
+      CHATBOT_DATABASE_URL: postgres://${CHATBOT_DB_USER:-chatbot}:${CHATBOT_DB_PASSWORD}@chatbot-postgres:5432/${CHATBOT_DB_NAME:-chatbot}
+    depends_on:
+      chatbot-postgres:
+        condition: service_healthy
+    networks:
+      - appnet
+
+  chatbot-postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${CHATBOT_DB_NAME:-chatbot}
+      POSTGRES_USER: ${CHATBOT_DB_USER:-chatbot}
+      POSTGRES_PASSWORD: ${CHATBOT_DB_PASSWORD:?required}
+    volumes:
+      - chatbot-pg-data:/var/lib/postgresql/data
+      - ./backend/sql/chatbot:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${CHATBOT_DB_USER:-chatbot} -d ${CHATBOT_DB_NAME:-chatbot}"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    networks:
+      - appnet
+
+  # One-shot data import. Run with:
+  #   docker compose -f docker-compose.vps.yml --profile setup run --rm import-data
+  import-data:
+    build:
+      context: ./backend
+      dockerfile: docker/production.Dockerfile
+    command: npx tsx scripts/import-data.ts
+    environment:
+      CHATBOT_DATABASE_URL: postgres://${CHATBOT_DB_USER:-chatbot}:${CHATBOT_DB_PASSWORD}@chatbot-postgres:5432/${CHATBOT_DB_NAME:-chatbot}
+    depends_on:
+      chatbot-postgres:
+        condition: service_healthy
+    networks:
+      - appnet
+    profiles:
+      - setup
+
+volumes:
+  chatbot-pg-data:
+  ai-logs:
+  caddy-data:
+  caddy-config:
+
+networks:
+  appnet:
+    driver: bridge

@@ -1,8 +1,9 @@
 import { nanoid } from "nanoid";
 
 import { InputProps } from "@/components/ui/chatbot/types";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { sendChat } from "@/lib/api/sendChat";
+import { transcribeVoice } from "@/lib/api/sendVoice";
 
 const fixedPrompts = [
   "Schedule an appointment",
@@ -110,6 +111,78 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
     textarea.style.height = `${textarea.scrollHeight}px`;
   }, [input]);
 
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+
+  useEffect(() => {
+    return () => {
+      mediaRecorderRef.current?.stop();
+    };
+  }, []);
+
+  const startRecording = async () => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      alert("Trình duyệt của bạn không hỗ trợ ghi âm.");
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        stream.getTracks().forEach((track) => track.stop());
+
+        const audioBlob = new Blob(audioChunksRef.current, {
+          type: mediaRecorder.mimeType,
+        });
+        audioChunksRef.current = [];
+
+        if (audioBlob.size === 0) return;
+
+        setIsTranscribing(true);
+        try {
+          const { transcript } = await transcribeVoice(audioBlob);
+          if (transcript) {
+            setInput((prev) => (prev.trim() ? `${prev.trim()} ${transcript}` : transcript));
+          }
+        } catch (err) {
+          console.error(err);
+          alert("Không thể chuyển giọng nói thành văn bản. Vui lòng thử lại.");
+        } finally {
+          setIsTranscribing(false);
+        }
+      };
+
+      mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error(err);
+      alert("Không thể truy cập microphone. Vui lòng cấp quyền micro cho trình duyệt.");
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    setIsRecording(false);
+  };
+
+  const toggleVoiceInput = () => {
+    if (isRecording) {
+      stopRecording();
+    } else {
+      startRecording();
+    }
+  };
+
   return (
     <div className="mt-auto flex w-full shrink-0 flex-col items-center gap-y-2 px-4 py-2">
       <div className="no-scroll flex w-full items-start gap-x-2 overflow-x-auto">
@@ -146,16 +219,29 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
         />
 
         <div className="flex items-center justify-center gap-x-2">
-          <svg
-            viewBox="-5 0 32 32"
-            className="group size-5 cursor-pointer fill-none"
+          <button
+            type="button"
+            aria-label={isRecording ? "stop voice input" : "start voice input"}
+            aria-pressed={isRecording}
+            disabled={isTranscribing}
+            onClick={toggleVoiceInput}
+            className="group cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
           >
-            <path
-              transform="translate(-105.000000, -307.000000)"
-              className="fill-grey-ink group-hover:fill-accent-ink"
-              d="M111,314 C111,311.238 113.239,309 116,309 C118.761,309 121,311.238 121,314 L121,324 C121,326.762 118.761,329 116,329 C113.239,329 111,326.762 111,324 L111,314 L111,314 Z M116,331 C119.866,331 123,327.866 123,324 L123,314 C123,310.134 119.866,307 116,307 C112.134,307 109,310.134 109,314 L109,324 C109,327.866 112.134,331 116,331 L116,331 Z M127,326 L125,326 C124.089,330.007 120.282,333 116,333 C111.718,333 107.911,330.007 107,326 L105,326 C105.883,330.799 110.063,334.51 115,334.955 L115,337 L114,337 C113.448,337 113,337.448 113,338 C113,338.553 113.448,339 114,339 L118,339 C118.552,339 119,338.553 119,338 C119,337.448 118.552,337 118,337 L117,337 L117,334.955 C121.937,334.51 126.117,330.799 127,326 L127,326 Z"
-            />
-          </svg>
+            <svg
+              viewBox="-5 0 32 32"
+              className={`size-5 fill-none ${isRecording ? "animate-pulse" : ""}`}
+            >
+              <path
+                transform="translate(-105.000000, -307.000000)"
+                className={
+                  isRecording
+                    ? "fill-accent-ink"
+                    : "fill-grey-ink group-hover:fill-accent-ink"
+                }
+                d="M111,314 C111,311.238 113.239,309 116,309 C118.761,309 121,311.238 121,314 L121,324 C121,326.762 118.761,329 116,329 C113.239,329 111,326.762 111,324 L111,314 L111,314 Z M116,331 C119.866,331 123,327.866 123,324 L123,314 C123,310.134 119.866,307 116,307 C112.134,307 109,310.134 109,314 L109,324 C109,327.866 112.134,331 116,331 L116,331 Z M127,326 L125,326 C124.089,330.007 120.282,333 116,333 C111.718,333 107.911,330.007 107,326 L105,326 C105.883,330.799 110.063,334.51 115,334.955 L115,337 L114,337 C113.448,337 113,337.448 113,338 C113,338.553 113.448,339 114,339 L118,339 C118.552,339 119,338.553 119,338 C119,337.448 118.552,337 118,337 L117,337 L117,334.955 C121.937,334.51 126.117,330.799 127,326 L127,326 Z"
+              />
+            </svg>
+          </button>
 
           <button
             disabled={currentChat?.isStreaming || !input.trim()}

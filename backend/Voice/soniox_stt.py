@@ -119,11 +119,22 @@ class SonioxSTT:
         on_partial: PartialCallback,
         on_utterance: Optional[UtteranceCallback],
         stop_event: Optional[threading.Event],
+        finalize_timeout: float = 3.0,
     ) -> str:
+        # `finalize_timeout`: sau khi đã gửi hết audio (frame rỗng = kết thúc
+        # stream), một số phiên không trả về "finished" đúng như tài liệu Soniox
+        # mô tả (https://soniox.com/docs/api-reference/stt/websocket-api) mà cứ
+        # im lặng rồi tự đóng với lỗi 408 "request_timeout" sau khoảng 20s.
+        # Quan sát thực tế: transcript đúng đã có sẵn trong token "provisional"
+        # (is_final=false) ngay khi việc gửi audio kết thúc, chỉ là chưa được
+        # server chốt (is_final=true). Để tránh treo/lỗi, nếu không có phản hồi
+        # mới trong `finalize_timeout` giây sau khi đã gửi xong, dùng transcript
+        # tạm tích luỹ được làm kết quả cuối thay vì tiếp tục chờ.
         config = self._build_config(
             audio_format, sample_rate, num_channels, enable_endpoint_detection
         )
         send_error: list[Exception] = []
+        send_done = threading.Event()
 
         with connect(SONIOX_STT_WS_URL) as ws:
             def sender() -> None:
@@ -137,20 +148,35 @@ class SonioxSTT:
                     ws.send(b"")                         # 3) frame rỗng = kết thúc stream
                 except Exception as exc:  # noqa: BLE001
                     send_error.append(exc)
+                finally:
+                    send_done.set()
 
             threading.Thread(target=sender, daemon=True).start()
 
             full_final: list[str] = []       # toàn bộ transcript (mọi token final)
             utterance: list[str] = []         # transcript của lượt nói hiện tại
             provisional = ""                  # token chưa final -> hiển thị tạm
+            timed_out = False
 
             try:
                 while True:
                     if send_error:
                         raise RuntimeError(f"Lỗi khi gửi audio: {send_error[0]}")
-                    res = json.loads(ws.recv())
+
+                    try:
+                        raw = ws.recv(timeout=finalize_timeout if send_done.is_set() else None)
+                    except TimeoutError:
+                        timed_out = True
+                        break
+
+                    res = json.loads(raw)
 
                     if res.get("error_code") is not None:
+                        # Đã gửi xong audio và có transcript tạm -> coi lỗi finalize
+                        # (vd 408 request_timeout) là "hết audio", không phải lỗi thật.
+                        if send_done.is_set() and (full_final or provisional):
+                            timed_out = True
+                            break
                         raise RuntimeError(
                             f"Soniox lỗi {res['error_code']} "
                             f"({res.get('error_type')}): {res.get('error_message')}"
@@ -184,13 +210,16 @@ class SonioxSTT:
             except ConnectionClosed:
                 pass  # server đóng sau khi 'finished' -> bình thường
 
-            # Với chế độ mic + endpoint, phần dư cuối cùng (nếu có) cũng flush ra.
+            tail_text = "".join(utterance) + (provisional if timed_out else "")
             if on_utterance:
-                tail = _clean_transcript("".join(utterance))
+                tail = _clean_transcript(tail_text)
                 if tail:
                     on_utterance(tail)
 
-        return _clean_transcript("".join(full_final))
+        result_text = "".join(full_final)
+        if timed_out and provisional:
+            result_text += provisional
+        return _clean_transcript(result_text)
 
     # ------------------------------------------------------------------ #
     # Chế độ 1: FILE / PUSH-TO-TALK  ->  trả về text hoàn chỉnh
