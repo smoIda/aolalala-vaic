@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(npx tsc *)",
+      "Bash(npx eslint *)",
+      "Bash(python -m py_compile server.py soniox_stt.py)",
+      "Bash(git check-ignore *)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(python -m pip install -r requirements.txt)",
+      "Bash(python server.py)",
+      "Bash(curl -s http://localhost:8001/health)",
+      "Bash(curl -s -X POST http://localhost:8001/voice -H 'Content-Type: audio/wav' --data-binary '@c:\\\\Users\\\\admin\\\\Downloads\\\\aolala\\\\aolala\\\\backend\\\\Voice\\\\test_audio.wav' -w '\\\\nHTTP_STATUS:%{http_code}\\\\n')"
+    ]
+  }
+}
