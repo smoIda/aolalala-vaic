@@ -1,6 +1,6 @@
 "use client";
 
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 
 import { ChatInput } from "@/components/ui/chatbot/chat-input";
 import { BaseChat, ChatAction } from "@/components/ui/chatbot/constants";
@@ -9,15 +9,69 @@ import { useToggle } from "@/hooks/useToggle";
 import { ChatMaximized } from "./chat-maximized";
 import { Chatbox } from "./chat-box";
 
+const className =
+  "size-7.5 bg-accent-ink-soft rounded-lg hover:scale-105 transition-[scale] active:scale-95 flex justify-center items-center cursor-pointer";
+
+const DEFAULT_CHAT = {
+  id: "1",
+  title: "New conversation",
+
+  isStreaming: false,
+
+  messages: [
+    {
+      id: "1",
+      role: "bot",
+      content:
+        "Xin chào, tôi là trợ lý ảo tại Bệnh viện Tim Hà Nội, tôi có thể giúp gì cho bạn?",
+      createdAt: new Date().toISOString(),
+    },
+  ],
+};
+
+const init = () => {
+  if (typeof window === "undefined") {
+    return {
+      chats: [DEFAULT_CHAT],
+      activeChatId: DEFAULT_CHAT.id,
+    };
+  }
+
+  try {
+    const saved = localStorage.getItem("CHAT_HISTORY");
+
+    if (!saved) {
+      return {
+        chats: [DEFAULT_CHAT],
+        activeChatId: DEFAULT_CHAT.id,
+      };
+    }
+
+    const chats = JSON.parse(saved);
+
+    return {
+      chats,
+      activeChatId: chats[0]?.id ?? DEFAULT_CHAT.id,
+    };
+  } catch {
+    return {
+      chats: [DEFAULT_CHAT],
+      activeChatId: DEFAULT_CHAT.id,
+    };
+  }
+};
+
 export function Chatbot() {
   const { isChatbotOpen, setIsChatbotOpen, setIsDarkTheme } = useToggle();
   const [input, setInput] = useState("");
-  const [state, dispatch] = useReducer(ChatAction, BaseChat);
+  const [state, dispatch] = useReducer(ChatAction, BaseChat, init);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
 
-  const className =
-    "size-7.5 bg-accent-ink-soft rounded-lg hover:scale-105 transition-[scale] active:scale-95 flex justify-center items-center cursor-pointer";
+  useEffect(
+    () => localStorage.setItem("CHAT_HISTORY", JSON.stringify(state.chats)),
+    [state.chats],
+  );
 
   return (
     <div className="relative z-60 px-2">

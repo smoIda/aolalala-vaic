@@ -62,16 +62,20 @@ export function ChatMaximized({
 
         <div className="flex w-full flex-col items-start justify-center gap-y-2 px-2">
           <button
-            onClick={() =>
+            onClick={() => {
+              const newId = nanoid();
+
               dispatch({
                 type: "CREATE_CHAT",
                 payload: {
-                  id: nanoid(),
+                  id: newId,
                   title: "New chat",
                   messages: [],
                 },
-              })
-            }
+              });
+
+              dispatch({ type: "SELECT_CHAT", payload: newId });
+            }}
             className="bg-accent-ink inline-flex w-full cursor-pointer items-center gap-x-2 rounded-xl px-4 py-3"
           >
             <svg viewBox="0 0 24 24" className="size-6 fill-none">
@@ -119,7 +123,7 @@ export function ChatMaximized({
               return (
                 <li
                   key={chat.id}
-                  className={`flex w-full rounded-full px-4 py-2 ${currentChat?.id === chat.id && "bg-accent-ink/20 border-accent-ink-soft/40 border"}`}
+                  className={`flex w-full items-center justify-between rounded-full px-4 py-2 ${currentChat?.id === chat.id && "bg-accent-ink/20 border-accent-ink-soft/40 border"}`}
                 >
                   <button
                     onClick={() =>
@@ -133,6 +137,29 @@ export function ChatMaximized({
                       {chat.title}
                     </p>
                   </button>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      dispatch({ type: "DELETE_CHAT", payload: chat.id });
+                    }}
+                    className="group size-5 cursor-pointer"
+                  >
+                    <svg viewBox="0 0 24 24" className="size-full fill-none">
+                      <g
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="stroke-grey-ink group-hover:stroke-alert-ink"
+                      >
+                        <path d="M10 12V17" />
+                        <path d="M14 12V17" />
+                        <path d="M4 7H20" />
+                        <path d="M6 10V18C6 19.6569 7.34315 21 9 21H15C16.6569 21 18 19.6569 18 18V10" />
+                        <path d="M9 5C9 3.89543 9.89543 3 11 3H13C14.1046 3 15 3.89543 15 5V7H9V5Z" />
+                      </g>
+                    </svg>
+                  </button>
                 </li>
               );
             })}
@@ -140,7 +167,7 @@ export function ChatMaximized({
         </div>
       </aside>
 
-      <main className="flex h-full min-w-0 flex-1 flex-col items-center justify-center">
+      <main className="relative flex h-full min-w-0 flex-1 flex-col items-center justify-center">
         <header className="border-grey-ink/40 flex w-full items-center justify-between gap-x-4 border-b px-6 py-4">
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -213,6 +240,13 @@ export function ChatMaximized({
         <p className="text-grey-ink mt-2 text-center text-sm">
           Always consult a licensed medical professional for health decisions.
         </p>
+
+        {!state.chats.length && (
+          <div className="absolute top-1/2 left-1/2 flex -translate-1/2 flex-col items-center justify-center">
+            <h3 className="text-accent-ink text-xl font-bold">HeartCare AI</h3>
+            <h3 className="text-3xl">Ready when you are!</h3>
+          </div>
+        )}
 
         <Chatbox {...state} />
 
