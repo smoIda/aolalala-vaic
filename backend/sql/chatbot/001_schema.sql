@@ -176,6 +176,32 @@ CREATE TABLE IF NOT EXISTS ticket_label_rules (
 
 CREATE INDEX IF NOT EXISTS ticket_label_rules_search_trgm_idx ON ticket_label_rules USING gin (search_text gin_trgm_ops);
 
+CREATE TABLE IF NOT EXISTS chat_sessions (
+  id TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
+  user_id TEXT,
+  status TEXT NOT NULL DEFAULT 'active',
+  current_flow TEXT,
+  current_state TEXT,
+  context JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS chat_sessions_status_idx ON chat_sessions(status);
+CREATE INDEX IF NOT EXISTS chat_sessions_updated_at_idx ON chat_sessions(updated_at);
+
+CREATE TABLE IF NOT EXISTS chat_messages (
+  id BIGSERIAL PRIMARY KEY,
+  session_id TEXT NOT NULL REFERENCES chat_sessions(id) ON DELETE CASCADE,
+  role TEXT NOT NULL CHECK (role IN ('user', 'assistant', 'tool')),
+  content TEXT NOT NULL,
+  tool_name TEXT,
+  metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS chat_messages_session_created_idx ON chat_messages(session_id, created_at DESC);
+
 CREATE TABLE IF NOT EXISTS chat_logs (
   id BIGSERIAL PRIMARY KEY,
   session_id TEXT,
@@ -185,3 +211,16 @@ CREATE TABLE IF NOT EXISTS chat_logs (
   response_text TEXT,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+CREATE OR REPLACE FUNCTION touch_updated_at()
+RETURNS trigger AS $$
+BEGIN
+  NEW.updated_at = now();
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS chat_sessions_touch_updated_at ON chat_sessions;
+CREATE TRIGGER chat_sessions_touch_updated_at
+BEFORE UPDATE ON chat_sessions
+FOR EACH ROW EXECUTE FUNCTION touch_updated_at();
