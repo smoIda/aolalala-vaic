@@ -64,5 +64,18 @@ export function ChatAction(
         ...base,
         activeChatId: action.payload,
       };
+
+    case "SET_STREAMING":
+      return {
+        ...base,
+        chats: base.chats.map((chat) =>
+          chat.id === action.payload.id
+            ? {
+                ...chat,
+                ...action.payload,
+              }
+            : chat,
+        ),
+      };
   }
 }

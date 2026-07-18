@@ -15,23 +15,21 @@
   --color-link-ink-hover: #6ad289;
 
   --color-alert-ink: #fb2c36;
+
+  --animate-chatbot-bounce: chatbot-bounce 0.8s infinite ease-in-out;
 }
 
 .dark {
-  /* Text */
   --color-ink: #f3f6fb;
   --color-white-ink: #0d1117;
   --color-grey-ink: #8d98a8;
 
-  /* Primary Accent */
   --color-accent-ink: #67b8f3;
   --color-accent-ink-soft: #8ecdf7;
 
-  /* Links */
   --color-link-ink: #6ddc83;
   --color-link-ink-hover: #98efad;
 
-  /* Alerts */
   --color-alert-ink: #ff5c67;
 }
 
@@ -65,6 +63,18 @@
     &::-webkit-scrollbar-thumb {
       background: transparent;
     }
+  }
+}
+
+@keyframes chatbot-bounce {
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-6px);
   }
 }
 

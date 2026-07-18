@@ -9,6 +9,7 @@ const fixedPrompts = [
   "Lower blood pressure naturally",
   "Explain my cholesterol report",
   "Clinics near my location",
+  ""
 ];
 
 export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
@@ -16,18 +17,22 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
     return content.length > 40 ? content.slice(0, 40) + "..." : content;
   };
 
-  const handleSend = async () => {
-    const content = input.trim();
+  const currentChat = state.chats.find(
+    (chat) => chat.id === state.activeChatId,
+  );
+
+  const handleSend = async (message?: string) => {
+    const chat = state.chats.find((chat) => chat.id === state.activeChatId);
+
+    if (!chat) return;
+    if (chat.isStreaming) return;
+
+    const content = (message ?? input).trim();
 
     if (!content) return;
 
-    const currentChat = state.chats.find(
-      (chat) => chat.id === state.activeChatId,
-    );
-
-    if (!currentChat) return;
-
-    const isFirstPrompt = currentChat?.messages.length === 0;
+    const { id: chatId, sessionId } = chat;
+    const isFirstPrompt = chat.messages.length === 0;
 
     dispatch({
       type: "SEND_MESSAGE",
@@ -39,22 +44,34 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
       },
     });
 
-    if (isFirstPrompt)
+    dispatch({
+      type: "SET_STREAMING",
+      payload: {
+        id: chatId,
+        isStreaming: true,
+      },
+    });
+
+    if (isFirstPrompt) {
       dispatch({
         type: "UPDATE_CHAT",
-        payload: { id: currentChat.id, title: generateTitle(content) },
+        payload: {
+          id: chatId,
+          title: generateTitle(content),
+        },
       });
+    }
 
     setInput("");
 
     try {
-      const data = await sendChat(content, currentChat.sessionId);
+      const data = await sendChat(content, sessionId);
 
-      if (!currentChat.sessionId) {
+      if (!sessionId) {
         dispatch({
           type: "UPDATE_CHAT",
           payload: {
-            id: currentChat.id,
+            id: chatId,
             sessionId: data.session.id,
           },
         });
@@ -71,6 +88,14 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
       });
     } catch (err) {
       console.error(err);
+    } finally {
+      dispatch({
+        type: "SET_STREAMING",
+        payload: {
+          id: chatId,
+          isStreaming: false,
+        },
+      });
     }
   };
 
@@ -133,8 +158,9 @@ export function ChatInput({ input, setInput, dispatch, state }: InputProps) {
           </svg>
 
           <button
+            disabled={currentChat?.isStreaming || !input.trim()}
             aria-label="send"
-            onClick={handleSend}
+            onClick={() => handleSend(input)}
             className={`${input.trim() ? "opacity-100" : "opacity-50"} bg-accent-ink flex size-8 shrink-0 transform-[scale] cursor-pointer items-center justify-center gap-x-2 rounded-full duration-200 hover:scale-110 active:scale-90`}
           >
             <svg viewBox="0 0 24 24" className="size-5 fill-none">

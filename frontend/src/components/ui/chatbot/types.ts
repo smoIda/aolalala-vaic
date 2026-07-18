@@ -45,4 +45,5 @@ export type ChatActionProps =
       } & Partial<Pick<ChatProps, "title" | "sessionId" | "isStreaming">>;
     }
   | { type: "DELETE_CHAT"; payload: string }
-  | { type: "SELECT_CHAT"; payload: string };
+  | { type: "SELECT_CHAT"; payload: string }
+  | { type: "SET_STREAMING"; payload: { id: string; isStreaming: boolean } };
