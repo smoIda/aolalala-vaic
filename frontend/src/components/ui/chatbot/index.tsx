@@ -146,7 +146,10 @@ export function Chatbot() {
 
                 <button
                   className={className}
-                  onClick={() => setIsMaximized(!isMaximized)}
+                  onClick={() => {
+                    setIsMinimized(false);
+                    setIsMaximized(!isMaximized);
+                  }}
                 >
                   <svg className="size-1/2" viewBox="0 0 24 24" fill="none">
                     <path
