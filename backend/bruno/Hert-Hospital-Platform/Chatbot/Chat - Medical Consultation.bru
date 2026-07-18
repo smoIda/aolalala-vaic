@@ -1,0 +1,25 @@
+meta {
+  name: Chat - Medical Consultation
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{chatbot_url}}/chat
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "message": "Tôi đau ngực, muốn hỏi bác sĩ",
+    "userProfile": {
+      "name": "Nguyễn Văn A",
+      "phone": "0900000000"
+    }
+  }
+}

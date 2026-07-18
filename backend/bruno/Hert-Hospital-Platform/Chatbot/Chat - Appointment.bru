@@ -1,0 +1,25 @@
+meta {
+  name: Chat - Appointment
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{chatbot_url}}/chat
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "message": "Tôi muốn đặt lịch khám tim mạch",
+    "userProfile": {
+      "name": "Nguyễn Văn B",
+      "phone": "0911111111"
+    }
+  }
+}

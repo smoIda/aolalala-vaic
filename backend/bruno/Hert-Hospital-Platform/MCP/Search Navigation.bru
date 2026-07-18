@@ -1,0 +1,22 @@
+meta {
+  name: Search Navigation
+  type: http
+  seq: 9
+}
+
+post {
+  url: {{mcp_url}}/tools/search_navigation
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "query": "đến khoa xét nghiệm",
+    "limit": 5
+  }
+}

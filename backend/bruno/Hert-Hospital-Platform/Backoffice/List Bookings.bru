@@ -1,0 +1,15 @@
+meta {
+  name: List Bookings
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{backoffice_url}}/bookings
+  body: none
+  auth: none
+}
+
+headers {
+  x-internal-api-key: {{internal_api_key}}
+}

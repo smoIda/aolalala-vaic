@@ -1,0 +1,22 @@
+meta {
+  name: Search Ticket Rules
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{mcp_url}}/tools/search_ticket_rules
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "query": "kết quả xét nghiệm của tôi",
+    "limit": 5
+  }
+}

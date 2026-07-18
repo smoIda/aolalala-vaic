@@ -1,0 +1,21 @@
+meta {
+  name: Chat - Emergency
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{chatbot_url}}/chat
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "message": "Tôi khó thở và đau ngực dữ dội"
+  }
+}

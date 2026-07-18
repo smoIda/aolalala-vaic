@@ -1,0 +1,26 @@
+[
+  {
+    "departmentName": "Khám Tự nguyện 1",
+    "building": "Cơ sở 1",
+    "floor": null,
+    "room": null,
+    "address": "Số 92 Trần Hưng Đạo, phường Cửa Nam, Hà Nội",
+    "instructions": "Dữ liệu vị trí chi tiết chưa có trong workbook. Dùng hotline 19001082 để xác nhận trước khi đến."
+  },
+  {
+    "departmentName": "Khám Tự nguyện cơ sở 2",
+    "building": "Cơ sở 2",
+    "floor": null,
+    "room": null,
+    "address": "Số 695 Lạc Long Quân, phường Tây Hồ, Hà Nội",
+    "instructions": "Dữ liệu vị trí chi tiết chưa có trong workbook. Dùng hotline 19001082 để xác nhận trước khi đến."
+  },
+  {
+    "departmentName": "Phòng khám đa khoa",
+    "building": "Phòng khám đa khoa",
+    "floor": null,
+    "room": null,
+    "address": null,
+    "instructions": "Chuyên khoa tim mạch, nhi khoa, mắt, tai mũi họng, răng hàm mặt, hô hấp, cơ xương khớp, y học cổ truyền, phục hồi chức năng, sản, da liễu. Liên hệ 0243.758.9090 hoặc 096.197.2097."
+  }
+]

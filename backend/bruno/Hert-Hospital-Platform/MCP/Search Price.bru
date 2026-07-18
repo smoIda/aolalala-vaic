@@ -1,0 +1,22 @@
+meta {
+  name: Search Price
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{mcp_url}}/tools/search_price
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "query": "siêu âm tim giá bao nhiêu",
+    "limit": 5
+  }
+}

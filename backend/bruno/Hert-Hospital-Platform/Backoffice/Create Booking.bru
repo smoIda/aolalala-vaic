@@ -1,0 +1,30 @@
+meta {
+  name: Create Booking
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{backoffice_url}}/bookings
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+  x-internal-api-key: {{internal_api_key}}
+}
+
+body:json {
+  {
+    "patientName": "Test Booking",
+    "patientPhone": "0911111111",
+    "department": "Tim mạch",
+    "preferredDate": "2026-07-20",
+    "preferredTime": "09:00",
+    "note": "Test booking từ Bruno",
+    "metadata": {
+      "source": "bruno"
+    }
+  }
+}

@@ -1,0 +1,22 @@
+meta {
+  name: Better Auth - Sign In
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{backoffice_url}}/api/auth/sign-in/email
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "email": "admin@example.com",
+    "password": "change-me-123456"
+  }
+}

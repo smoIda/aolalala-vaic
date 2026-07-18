@@ -1,0 +1,22 @@
+meta {
+  name: Search Service
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{mcp_url}}/tools/search_service
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "query": "giá khám cổ chân",
+    "limit": 10
+  }
+}

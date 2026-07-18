@@ -1,0 +1,22 @@
+meta {
+  name: Search FAQ
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{mcp_url}}/tools/search_faq
+  body: json
+  auth: none
+}
+
+headers {
+  content-type: application/json
+}
+
+body:json {
+  {
+    "query": "có cần đặt lịch không",
+    "limit": 5
+  }
+}
