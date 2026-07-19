@@ -1,8 +1,9 @@
 # Full-stack deployment for a single VPS (Oracle Cloud Free Tier, arm64/amd64).
 #
 # One public entrypoint (Caddy) terminates HTTPS and routes:
-#   https://<domain>/      → frontend (Next.js)
-#   https://<domain>/api/* → chatbot-api (Fastify)  [/api prefix stripped]
+#   https://<domain>/            → frontend (Next.js)
+#   https://<domain>/api/*       → chatbot-api (Fastify)  [/api prefix stripped]
+#   https://<domain>/dashboard/* → dashboard (FastAPI)    [/dashboard prefix stripped]
 #
 # Everything else (Postgres, MCP, Soniox STT) stays on the private network and
 # is never published to the host.
@@ -56,7 +57,7 @@ services:
       CHATBOT_DATABASE_URL: postgres://${CHATBOT_DB_USER:-chatbot}:${CHATBOT_DB_PASSWORD}@chatbot-postgres:5432/${CHATBOT_DB_NAME:-chatbot}
       MCP_HTTP_URL: http://hert-hospital-mcp:5000
       SONIOX_SERVICE_URL: http://soniox-stt:8001
-      DASHBOARD_API_URL: ${DASHBOARD_API_URL:-http://localhost:8000/api/internal}
+      DASHBOARD_API_URL: ${DASHBOARD_API_URL:-http://dashboard:8000/api/internal}
       INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-internal-key}
       OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
       OPENROUTER_MODEL: ${OPENROUTER_MODEL:-~openai/gpt-latest}
@@ -117,6 +118,20 @@ services:
       interval: 5s
       timeout: 3s
       retries: 20
+    networks:
+      - appnet
+
+  dashboard:
+    build:
+      context: ./Dashboard
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      DASHBOARD_DATABASE_URL: postgres://${CHATBOT_DB_USER:-chatbot}:${CHATBOT_DB_PASSWORD}@chatbot-postgres:5432/${CHATBOT_DB_NAME:-chatbot}
+      INTERNAL_API_KEY: ${INTERNAL_API_KEY:-dev-internal-key}
+    depends_on:
+      chatbot-postgres:
+        condition: service_healthy
     networks:
       - appnet
 

@@ -6,8 +6,9 @@
 #   - ":80" → plain HTTP only (fallback if you have no DNS name yet).
 #
 # Routing:
-#   /api/*  → chatbot-api (the /api prefix is stripped, so /api/chat → /chat)
-#   /*      → Next.js frontend
+#   /api/*       → chatbot-api (the /api prefix is stripped, so /api/chat → /chat)
+#   /dashboard/* → dashboard (the /dashboard prefix is stripped)
+#   /*           → Next.js frontend
 
 {$SITE_ADDRESS} {
 	encode gzip
@@ -21,6 +22,11 @@
 				write_timeout 120s
 			}
 		}
+	}
+
+	# Dashboard (admin ticket management). Strip /dashboard prefix.
+	handle_path /dashboard/* {
+		reverse_proxy dashboard:8000
 	}
 
 	# Everything else → frontend (Next.js standalone server on :3000)
